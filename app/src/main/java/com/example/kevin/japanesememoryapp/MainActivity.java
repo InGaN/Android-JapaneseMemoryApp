@@ -37,6 +37,13 @@ public class MainActivity extends AppCompatActivity {
                 callInputActivity();
             }
         });
+        Button btn_toList = (Button)findViewById(R.id.btn_toList);
+        btn_toList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callKanjiList();
+            }
+        });
 
         displayKanji(getKanjiFromDatabase());
     }
@@ -143,6 +150,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void callInputActivity() {
         Intent intent = new Intent(this, InputActivity.class);
+        startActivity(intent);
+    }
+
+    private void callKanjiList() {
+        Intent intent = new Intent(this, ListActivity.class);
         startActivity(intent);
     }
 }

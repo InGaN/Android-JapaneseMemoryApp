@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class InputActivity extends AppCompatActivity {
+    public static int DEFAULT_DIFFICULTY = 5;
+
     FeedReaderDbHelper dbHelper;
 
     EditText tbx_furigana;
@@ -72,6 +74,7 @@ public class InputActivity extends AppCompatActivity {
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_FURIGANA, tbx_furigana.getText().toString());
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_KANJI, tbx_kanji.getText().toString());
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_MEANING, tbx_meaning.getText().toString());
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, DEFAULT_DIFFICULTY);
 
         long newRowId;
         newRowId = db.insert(
@@ -79,7 +82,16 @@ public class InputActivity extends AppCompatActivity {
                 FeedReaderContract.FeedEntry.COLUMN_NAME_KANJI,
                 values
         );
-        MainActivity.showAlert(InputActivity.this, "New kanji added to list", "(id: " + newRowId + ")");
+        if(newRowId == -1) {
+            MainActivity.showAlert(InputActivity.this, "ERROR", "Unable to enter new kanji to list...");
+        }
+        else {
+            MainActivity.showAlert(InputActivity.this, "New kanji added to list", "(id: " + newRowId + ")");
+            tbx_furigana.setText("");
+            tbx_kanji.setText("");
+            tbx_meaning.setText("");
+        }
+
     }
 
     private boolean verifyInput() {
