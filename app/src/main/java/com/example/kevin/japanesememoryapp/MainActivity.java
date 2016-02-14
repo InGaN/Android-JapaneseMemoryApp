@@ -11,7 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -25,6 +27,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        RelativeLayout main = (RelativeLayout)findViewById(R.id.con_main);
+        main.setOnTouchListener(new OnSwipeTouchListener(MainActivity.this) {
+            public void onSwipeTop() {
+                Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
+            }
+            public void onSwipeRight() {
+                Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
+            }
+            public void onSwipeLeft() {
+                Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
+            }
+            public void onSwipeBottom() {
+                Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         lbl_kanji = (TextView)findViewById(R.id.lbl_kanji);
         lbl_furigana = (TextView)findViewById(R.id.lbl_furigana);
@@ -42,6 +60,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 callKanjiList();
+            }
+        });
+        Button btn_toSettings = (Button)findViewById(R.id.btn_toSettings);
+        btn_toSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callSettings();
             }
         });
 
@@ -155,6 +180,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void callKanjiList() {
         Intent intent = new Intent(this, ListActivity.class);
+        startActivity(intent);
+    }
+
+    private void callSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 }
