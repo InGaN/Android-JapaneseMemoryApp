@@ -1,0 +1,35 @@
+package com.example.kevin.japanesememoryapp;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
+
+public final class FeedReaderContract {
+    // To prevent someone from accidentally instantiating the contract class,
+    // give it an empty constructor.
+    public FeedReaderContract() {}
+
+    /* Inner class that defines the table contents */
+    public static abstract class FeedEntry implements BaseColumns {
+        public static final String TABLE_NAME = "kanji";
+
+        public static final String COLUMN_NAME_ID = "id";
+        public static final String COLUMN_NAME_KANJI = "kanji";
+        public static final String COLUMN_NAME_FURIGANA = "furigana";
+        public static final String COLUMN_NAME_MEANING = "meaning";
+        public static final String COLUMN_NAME_DIFFICULTY = "difficulty";
+
+    }
+
+    public static final String SQL_CREATE_ENTRIES =
+            "CREATE TABLE " + FeedEntry.TABLE_NAME + " (" +
+            FeedEntry.COLUMN_NAME_ID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+            FeedEntry.COLUMN_NAME_KANJI + " varchar(255), " +
+            FeedEntry.COLUMN_NAME_FURIGANA + " varchar(255), " +
+            FeedEntry.COLUMN_NAME_MEANING + " varchar(255), " +
+            FeedEntry.COLUMN_NAME_DIFFICULTY + " INTEGER NOT NULL )";
+
+    public static final String SQL_DELETE_ENTRIES =
+            "DROP TABLE IF EXISTS " + FeedEntry.TABLE_NAME;
+}
