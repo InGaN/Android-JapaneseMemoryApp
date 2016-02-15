@@ -33,12 +33,18 @@ public class MainActivity extends AppCompatActivity {
     TextView lbl_furigana;
     TextView lbl_meaning;
     TextView lbl_difficulty;
+    boolean showFurigana, showKanji, showMeaning, showDifficulty;
+    int currentIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
+        showFurigana = settings.getBoolean("furiganaActive", true);
+        showKanji = settings.getBoolean("kanjiActive", true);
+        showMeaning = settings.getBoolean("meaningActive", true);
+        showDifficulty = settings.getBoolean("difficultyActive", true);
 
         setContentView(R.layout.activity_main);
 
@@ -50,10 +56,14 @@ public class MainActivity extends AppCompatActivity {
 
             public void onSwipeRight() {
                 Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
+                currentIndex = (currentIndex + 1) % kanjiList.size();
+                displayKanji(currentIndex);
             }
 
             public void onSwipeLeft() {
                 Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
+                currentIndex = (currentIndex - 1 < 0) ? kanjiList.size() - 1 : currentIndex - 1;
+                displayKanji(currentIndex);
             }
 
             public void onSwipeBottom() {
@@ -61,13 +71,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ProgressBar bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
-        bar_timer.setVisibility(settings.getBoolean("timerActive", true) ? View.VISIBLE : View.INVISIBLE);
-
-        lbl_kanji = (TextView)findViewById(R.id.lbl_kanji);
         lbl_furigana = (TextView)findViewById(R.id.lbl_furigana);
+        lbl_furigana.setVisibility((showFurigana) ? View.VISIBLE : View.INVISIBLE);
+        lbl_kanji = (TextView)findViewById(R.id.lbl_kanji);
+        lbl_kanji.setVisibility((showKanji) ? View.VISIBLE : View.INVISIBLE);
         lbl_meaning = (TextView)findViewById(R.id.lbl_meaning);
+        lbl_meaning.setVisibility((showMeaning) ? View.VISIBLE : View.INVISIBLE);
         lbl_difficulty = (TextView)findViewById(R.id.lbl_difficulty);
+        lbl_difficulty.setVisibility((showDifficulty) ? View.VISIBLE : View.INVISIBLE);
+
+        setQuestionMode(settings);
 
         Button btn_toInput = (Button)findViewById(R.id.btn_toInput);
         btn_toInput.setOnClickListener(new View.OnClickListener() {
@@ -93,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
         kanjiList = getKanjiFromDatabase();
         Log.d("array", "array: " + Arrays.toString(kanjiArray));
-        displayKanji(kanjiArray[0]);
+        displayKanji(kanjiArray[currentIndex]);
     }
 
     @Override
@@ -190,6 +203,21 @@ public class MainActivity extends AppCompatActivity {
             lbl_meaning.setText("Unable to load Kanji...");
             lbl_difficulty.setText("");
         }
+    }
+
+    private void setQuestionMode(SharedPreferences settings) {
+        long mode = settings.getLong("questionMode", 0L);
+
+        ProgressBar bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
+        bar_timer.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
+
+        if(mode == 1)
+        lbl_kanji.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAlert(MainActivity.this, "TEST", "mode tap active");
+            }
+        });
     }
 
     public static void showAlert(Context context, String title, String message) {

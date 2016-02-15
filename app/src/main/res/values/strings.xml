@@ -8,17 +8,21 @@
     <string name="title_activity_settings">SettingsActivity</string>
 
     <string name="settingsAbout">About this application</string>
-    <string name="settingsTimer">Timer</string>
+    <string name="settingsQuestionMode">Questioning mode</string>
     <string name="settingsShowInstructions">During questioning:</string>
     <string name="settingsShowFurigana">Show Furigana</string>
     <string name="settingsShowKanji">Show Kanji</string>
     <string name="settingsShowMeaning">Show Meaning</string>
+    <string name="settingsShowDifficulty">Show Difficulty</string>
     <string name="settingsColorBG">Background color</string>
     <string name="settingsColorFurigana">Furigana color</string>
     <string name="settingsColorKanji">Kanji color</string>
     <string name="settingsColorMeaning">Meaning color</string>
     <string name="settingsShow">show</string>
     <string name="settingsHide">hide</string>
+
+    <string name="questionModeTime">Timed</string>
+    <string name="questionModeTap">Tapping</string>
 
     <string name="inputAddNewKanji">insert new Kanji</string>
     <string name="inputHintFurigana">Furigana...</string>

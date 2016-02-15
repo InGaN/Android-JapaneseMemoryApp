@@ -8,7 +8,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -18,6 +21,8 @@ public class SettingsActivity extends AppCompatActivity {
     Switch swc_furigana;
     Switch swc_kanji;
     Switch swc_meaning;
+    Switch swc_difficulty;
+    Spinner spn_questionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +39,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        setSpinners(settings);
         setSwitches(settings);
     }
 
@@ -59,19 +65,31 @@ public class SettingsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setSwitches(SharedPreferences settings) {
-        swc_timer = (Switch)findViewById(R.id.swc_timer);
-        swc_timer.setChecked(settings.getBoolean("timerActive", true));
-        swc_timer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+    private void setSpinners(SharedPreferences settings) {
+        spn_questionMode = (Spinner)findViewById(R.id.spn_questionMode);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.questionModes, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_questionMode.setAdapter(adapter);
+
+        spn_questionMode.setSelection((int)settings.getLong("questionMode", 0L));
+
+        spn_questionMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("timerActive", isChecked);
+                editor.putLong("questionMode", id);
                 editor.commit();
             }
-        });
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    private void setSwitches(SharedPreferences settings) {
         swc_furigana = (Switch)findViewById(R.id.swc_furigana);
         swc_furigana.setChecked(settings.getBoolean("furiganaActive", true));
         swc_furigana.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -104,6 +122,18 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("meaningActive", isChecked);
+                editor.commit();
+            }
+        });
+
+        swc_difficulty = (Switch)findViewById(R.id.swc_difficulty);
+        swc_difficulty.setChecked(settings.getBoolean("difficultyActive", true));
+        swc_difficulty.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("difficultyActive", isChecked);
                 editor.commit();
             }
         });
