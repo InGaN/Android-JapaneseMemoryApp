@@ -7,28 +7,28 @@
     tools:context="com.example.kevin.japanesememoryapp.InputActivity">
 
     <TextView
-        android:text="insert new Kanji"
+        android:text="@string/inputAddNewKanji"
         android:id="@+id/lbl_addKanji"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/tbx_addFurigana"
-        android:hint="Furigana..."
+        android:hint="@string/inputHintFurigana"
         android:layout_below="@id/lbl_addKanji"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/tbx_addKanji"
-        android:hint="Kanji..."
+        android:hint="@string/inputHintKanji"
         android:layout_below="@id/tbx_addFurigana"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/tbx_addMeaning"
-        android:hint="Meaning..."
+        android:hint="@string/inputHintMeaning"
         android:layout_below="@id/tbx_addKanji"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />

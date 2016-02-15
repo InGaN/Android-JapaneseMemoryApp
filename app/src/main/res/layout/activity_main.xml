@@ -38,9 +38,17 @@
         android:text="@string/hello_world"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/lbl_difficulty"
+        android:gravity="center"
+        android:layout_below="@id/lbl_meaning"
+        android:textSize="10dp"
+        android:text="@string/hello_world"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
      <EditText
          android:id="@+id/tbx_input"
-         android:layout_below="@id/lbl_meaning"
+         android:layout_below="@id/lbl_difficulty"
          android:layout_width="fill_parent"
          android:layout_height="wrap_content" />
 

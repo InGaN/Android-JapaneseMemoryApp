@@ -3,29 +3,43 @@ package com.example.kevin.japanesememoryapp;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MainActivity extends AppCompatActivity {
     FeedReaderDbHelper dbHelper;
+    ArrayList<Kanji> kanjiList;
+    int[] kanjiArray;
     TextView lbl_kanji;
     TextView lbl_furigana;
     TextView lbl_meaning;
+    TextView lbl_difficulty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
+
         setContentView(R.layout.activity_main);
 
         RelativeLayout main = (RelativeLayout)findViewById(R.id.con_main);
@@ -33,20 +47,27 @@ public class MainActivity extends AppCompatActivity {
             public void onSwipeTop() {
                 Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
+
             public void onSwipeRight() {
                 Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
             }
+
             public void onSwipeLeft() {
                 Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
             }
+
             public void onSwipeBottom() {
                 Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
             }
         });
 
+        ProgressBar bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
+        bar_timer.setVisibility(settings.getBoolean("timerActive", true) ? View.VISIBLE : View.INVISIBLE);
+
         lbl_kanji = (TextView)findViewById(R.id.lbl_kanji);
         lbl_furigana = (TextView)findViewById(R.id.lbl_furigana);
         lbl_meaning = (TextView)findViewById(R.id.lbl_meaning);
+        lbl_difficulty = (TextView)findViewById(R.id.lbl_difficulty);
 
         Button btn_toInput = (Button)findViewById(R.id.btn_toInput);
         btn_toInput.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +91,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        displayKanji(getKanjiFromDatabase());
+        kanjiList = getKanjiFromDatabase();
+        Log.d("array", "array: " + Arrays.toString(kanjiArray));
+        displayKanji(kanjiArray[0]);
     }
 
     @Override
@@ -108,13 +131,13 @@ public class MainActivity extends AppCompatActivity {
                 FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY
         };
 
-        String sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " DESC";
+        String sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " ASC";
 
         Cursor cursor = db.query(
                 FeedReaderContract.FeedEntry.TABLE_NAME,
                 selectQuery,
-                FeedReaderContract.FeedEntry.COLUMN_NAME_ID + "=?",
-                new String[]{"1"},
+                null,
+                null,
                 null,
                 null,
                 sortOrder
@@ -134,29 +157,38 @@ public class MainActivity extends AppCompatActivity {
                 ));
                 cursor.moveToNext();
             }
+            kanjiArray = new int[kanji.size()];
+            for(int x = 0; x < kanji.size(); x++) {
+                kanjiArray[x] = x;
+            }
+            FisherYatesShuffleArray(kanjiArray);
             return kanji;
         }
         return null;
     }
 
-    private void displayKanji(ArrayList<Kanji> kanjiList) {
+    private void displayKanji(int index) {
         if(kanjiList != null) {
             if (kanjiList.size() > 0) {
-                Kanji currentKanji = kanjiList.get(0);
+                Kanji currentKanji = kanjiList.get(index);
+
                 lbl_kanji.setText(currentKanji.getKanji());
                 lbl_furigana.setText(currentKanji.getFurigana());
                 lbl_meaning.setText(currentKanji.getMeaning());
+                lbl_difficulty.setText(currentKanji.getDifficulty() + "/9");
             }
             else {
                 lbl_kanji.setText("");
                 lbl_furigana.setText("");
                 lbl_meaning.setText("Kanji list is empty...");
+                lbl_difficulty.setText("");
             }
         }
         else {
             lbl_kanji.setText("");
             lbl_furigana.setText("");
             lbl_meaning.setText("Unable to load Kanji...");
+            lbl_difficulty.setText("");
         }
     }
 
@@ -186,5 +218,16 @@ public class MainActivity extends AppCompatActivity {
     private void callSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
+    }
+
+    static void FisherYatesShuffleArray(int[] array)
+    {
+        int n = array.length;
+        for (int i = 0; i < array.length; i++) {
+            int random = i + (int) (Math.random() * (n - i));
+            int randomElement = array[random];
+            array[random] = array[i];
+            array[i] = randomElement;
+        }
     }
 }
