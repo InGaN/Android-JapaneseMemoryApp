@@ -14,7 +14,8 @@
         <TextView
             android:text="@string/settingsQuestionMode"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
         <Spinner
             android:id="@+id/spn_questionMode"
             android:layout_width="fill_parent"
@@ -22,10 +23,58 @@
 
 
     </TableRow>
+    <TableRow
+        android:id="@+id/row_questionModeTimeReveal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:text="@string/settingsTimerModeSecondsReveal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
+        <EditText
+            android:id="@+id/tbx_timerReveal"
+            android:ems="2"
+            android:selectAllOnFocus="true"
+            android:gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:maxLength="2"
+            android:inputType="number"/>
+    </TableRow>
+    <TableRow
+        android:id="@+id/row_questionModeTimeNext"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:text="@string/settingsTimerModeSecondsNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
+        <EditText
+            android:id="@+id/tbx_timerNext"
+            android:ems="2"
+            android:selectAllOnFocus="true"
+            android:gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:maxLength="2"
+            android:inputType="number"/>
+    </TableRow>
+
+    <View
+        android:layout_height="1dp"
+        android:layout_width="fill_parent"
+        android:background="#FF909090" />
     <TextView
         android:text="@string/settingsShowInstructions"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:padding="3dp"/>
     <TableRow
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -33,7 +82,8 @@
         <TextView
             android:text="@string/settingsShowFurigana"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
         <Switch
             android:id="@+id/swc_furigana"
             android:textOn="@string/settingsShow"
@@ -48,7 +98,8 @@
         <TextView
             android:text="@string/settingsShowKanji"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
         <Switch
             android:id="@+id/swc_kanji"
             android:textOn="@string/settingsShow"
@@ -63,7 +114,8 @@
         <TextView
             android:text="@string/settingsShowMeaning"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
         <Switch
             android:id="@+id/swc_meaning"
             android:textOn="@string/settingsShow"
@@ -78,7 +130,8 @@
         <TextView
             android:text="@string/settingsShowDifficulty"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
         <Switch
             android:id="@+id/swc_difficulty"
             android:textOn="@string/settingsShow"
@@ -86,13 +139,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </TableRow>
+
+    <View
+        android:layout_height="1dp"
+        android:layout_width="fill_parent"
+        android:background="#FF909090" />
+
     <TableRow
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         <TextView
             android:text="@string/settingsColorBG"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
     </TableRow>
     <TableRow
         android:layout_width="fill_parent"
@@ -100,7 +160,8 @@
         <TextView
             android:text="@string/settingsColorFurigana"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
     </TableRow>
     <TableRow
         android:layout_width="fill_parent"
@@ -108,7 +169,8 @@
         <TextView
             android:text="@string/settingsColorKanji"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
     </TableRow>
     <TableRow
         android:layout_width="fill_parent"
@@ -116,12 +178,18 @@
         <TextView
             android:text="@string/settingsColorMeaning"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
     </TableRow>
 
+    <View
+        android:layout_height="1dp"
+        android:layout_width="fill_parent"
+        android:background="#FF909090" />
     <TextView
         android:id="@+id/lbl_settingsAbout"
         android:text="@string/settingsAbout"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:padding="3dp" />
 </TableLayout>

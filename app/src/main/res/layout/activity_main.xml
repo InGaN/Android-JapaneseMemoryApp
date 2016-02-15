@@ -12,6 +12,15 @@
         android:layout_alignParentTop="true"
         android:layout_height="wrap_content"
         style="@android:style/Widget.ProgressBar.Horizontal" />
+    <TextView
+        android:id="@+id/lbl_paused"
+        android:text="@string/paused"
+        android:gravity="left"
+        android:layout_below="@id/bar_timer"
+        android:textSize="12dp"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/lbl_furigana"

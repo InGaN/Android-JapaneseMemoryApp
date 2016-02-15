@@ -3,6 +3,8 @@ package com.example.kevin.japanesememoryapp;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,18 +13,21 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 public class SettingsActivity extends AppCompatActivity {
     public static final String PREFERENCES_FILE_NAME = "MyPreferences";
-    Switch swc_timer;
     Switch swc_furigana;
     Switch swc_kanji;
     Switch swc_meaning;
     Switch swc_difficulty;
     Spinner spn_questionMode;
+    EditText tbx_secondsReveal;
+    EditText tbx_secondsNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +40,11 @@ public class SettingsActivity extends AppCompatActivity {
         lbl_about.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.showAlert(SettingsActivity.this, "About", "Version: 0.1");
+                MainActivity.showAlert(SettingsActivity.this, getString(R.string.aboutTitle), getString(R.string.aboutMessage) +"\r"+ getString(R.string.aboutWebsite));
             }
         });
 
-        setSpinners(settings);
-        setSwitches(settings);
+        initializeItems(settings);
     }
 
     @Override
@@ -65,13 +69,19 @@ public class SettingsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void initializeItems(SharedPreferences settings) {
+        setSpinners(settings);
+        setEditTexts(settings);
+        setSwitches(settings);
+    }
+
     private void setSpinners(SharedPreferences settings) {
         spn_questionMode = (Spinner)findViewById(R.id.spn_questionMode);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.questionModes, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_questionMode.setAdapter(adapter);
 
-        spn_questionMode.setSelection((int)settings.getLong("questionMode", 0L));
+        spn_questionMode.setSelection((int) settings.getLong("questionMode", 0L));
 
         spn_questionMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -80,6 +90,7 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("questionMode", id);
                 editor.commit();
+                visibleTimerOptions((id == 0));
             }
 
             @Override
@@ -87,6 +98,59 @@ public class SettingsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void setEditTexts(SharedPreferences settings) {
+        tbx_secondsReveal = (EditText)findViewById(R.id.tbx_timerReveal);
+        tbx_secondsReveal.setText(String.valueOf(settings.getInt("secondsToReveal", 1)));
+        tbx_secondsReveal.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(!s.toString().equals("")) {
+                    if(Integer.parseInt(s.toString()) > 0) {
+                        SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putInt("secondsToReveal", Integer.parseInt(s.toString()));
+                        editor.commit();
+                    }
+                    else {
+                        MainActivity.showAlert(SettingsActivity.this, getString(R.string.error), getString(R.string.settingsNoZero));
+                    }
+                }
+            }
+        });
+
+        tbx_secondsNext = (EditText)findViewById(R.id.tbx_timerNext);
+        tbx_secondsNext.setText(String.valueOf(settings.getInt("secondsToNext", 1)));
+        tbx_secondsNext.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(!s.toString().equals("")) {
+                    if(Integer.parseInt(s.toString()) > 0) {
+                        SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putInt("secondsToNext", Integer.parseInt(s.toString()));
+                        editor.commit();
+                    }
+                    else {
+                        MainActivity.showAlert(SettingsActivity.this, getString(R.string.error), getString(R.string.settingsNoZero));
+                    }
+                }
+            }
+        });
+
     }
 
     private void setSwitches(SharedPreferences settings) {
@@ -137,5 +201,13 @@ public class SettingsActivity extends AppCompatActivity {
                 editor.commit();
             }
         });
+    }
+
+    private void visibleTimerOptions(boolean setting) {
+        TableRow row1 = (TableRow)findViewById(R.id.row_questionModeTimeReveal);
+        TableRow row2 = (TableRow)findViewById(R.id.row_questionModeTimeNext);
+
+        row1.setVisibility( (setting) ? View.VISIBLE : View.GONE );
+        row2.setVisibility( (setting) ? View.VISIBLE : View.GONE );
     }
 }
