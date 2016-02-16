@@ -37,7 +37,7 @@ public class InputActivity extends AppCompatActivity {
                     saveKanji();
                 }
                 else {
-                    MainActivity.showAlert(InputActivity.this, "ERROR", "Fill in all input areas");
+                    MainActivity.showAlert(InputActivity.this, getString(R.string.error), getString(R.string.inputFillInAllPlease));
                 }
             }
         });
@@ -48,7 +48,7 @@ public class InputActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_input, menu);
+        //getMenuInflater().inflate(R.menu.menu_input, menu);
         return true;
     }
 
@@ -83,10 +83,10 @@ public class InputActivity extends AppCompatActivity {
                 values
         );
         if(newRowId == -1) {
-            MainActivity.showAlert(InputActivity.this, "ERROR", "Unable to enter new kanji to list...");
+            MainActivity.showAlert(InputActivity.this, getString(R.string.error), getString(R.string.inputUnableToAdd));
         }
         else {
-            MainActivity.showAlert(InputActivity.this, "New kanji added to list", "(id: " + newRowId + ")");
+            MainActivity.showAlert(InputActivity.this, getString(R.string.inputNewKanjiAdded), "(id: " + newRowId + ")");
             tbx_furigana.setText("");
             tbx_kanji.setText("");
             tbx_meaning.setText("");

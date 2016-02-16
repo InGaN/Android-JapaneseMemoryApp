@@ -1,14 +1,19 @@
 package com.example.kevin.japanesememoryapp;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -28,7 +33,7 @@ public class ListActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_list, menu);
+        //getMenuInflater().inflate(R.menu.menu_list, menu);
         return true;
     }
 
@@ -48,10 +53,36 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private void fillListWithKanji(final ArrayList<Kanji> kanji) {
-        CustomListAdapter customListAdapter = new CustomListAdapter(this, kanji);
+        TextView lbl_emptyList = (TextView)findViewById(R.id.lbl_emptyList);
+        lbl_emptyList.setVisibility((kanji.size() > 0) ? View.GONE : View.VISIBLE);
+        if(kanji.size() > 0) {
+            CustomListAdapter customListAdapter = new CustomListAdapter(this, kanji);
 
-        kanjiList = (ListView)findViewById(R.id.lst_kanjiList);
-        kanjiList.setAdapter(customListAdapter);
+            kanjiList = (ListView) findViewById(R.id.lst_kanjiList);
+            kanjiList.setAdapter(customListAdapter);
+        }
+        else {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            callInputActivity();
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //Do nothing, close dialog
+                            break;
+                    }
+                }
+            };
+            AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
+            builder.setMessage(getString(R.string.mainEmptyListMessage)).setPositiveButton(getString(R.string.mainAddNew), dialogClickListener).setNegativeButton(getString(R.string.mainCancel), dialogClickListener).show();
+        }
+    }
+
+    private void callInputActivity() {
+        Intent intent = new Intent(this, InputActivity.class);
+        startActivity(intent);
     }
 
     private ArrayList<Kanji> getKanjiFromDatabase() {

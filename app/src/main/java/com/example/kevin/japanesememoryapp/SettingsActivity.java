@@ -25,16 +25,20 @@ public class SettingsActivity extends AppCompatActivity {
     Switch swc_kanji;
     Switch swc_meaning;
     Switch swc_difficulty;
+    Switch swc_showMenuButtons;
     Spinner spn_questionMode;
+    Spinner spn_themes;
     EditText tbx_secondsReveal;
     EditText tbx_secondsNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+        //setTheme(MainActivity.getThemeId(settings));
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_settings);
-        SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+
 
         TextView lbl_about = (TextView)findViewById(R.id.lbl_settingsAbout);
         lbl_about.setOnClickListener(new View.OnClickListener() {
@@ -47,10 +51,12 @@ public class SettingsActivity extends AppCompatActivity {
         initializeItems(settings);
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        //getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
     }
 
@@ -77,9 +83,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void setSpinners(SharedPreferences settings) {
         spn_questionMode = (Spinner)findViewById(R.id.spn_questionMode);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.questionModes, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spn_questionMode.setAdapter(adapter);
+        ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this, R.array.questionModes, android.R.layout.simple_spinner_item);
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_questionMode.setAdapter(adapter1);
 
         spn_questionMode.setSelection((int) settings.getLong("questionMode", 0L));
 
@@ -98,6 +104,30 @@ public class SettingsActivity extends AppCompatActivity {
 
             }
         });
+
+        /*spn_themes = (Spinner)findViewById(R.id.spn_themes);
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.selectableThemes, android.R.layout.simple_spinner_item);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_themes.setAdapter(adapter2);
+
+        spn_themes.setSelection((int) settings.getLong("appTheme", 0L));
+
+        spn_themes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putLong("appTheme", id);
+                editor.commit();
+                finish();
+                startActivity(getIntent());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        }); */
     }
 
     private void setEditTexts(SharedPreferences settings) {
@@ -154,13 +184,13 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setSwitches(SharedPreferences settings) {
+        final SharedPreferences.Editor editor = settings.edit();
+
         swc_furigana = (Switch)findViewById(R.id.swc_furigana);
         swc_furigana.setChecked(settings.getBoolean("furiganaActive", true));
         swc_furigana.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("furiganaActive", isChecked);
                 editor.commit();
             }
@@ -171,8 +201,6 @@ public class SettingsActivity extends AppCompatActivity {
         swc_kanji.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("kanjiActive", isChecked);
                 editor.commit();
             }
@@ -183,8 +211,6 @@ public class SettingsActivity extends AppCompatActivity {
         swc_meaning.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("meaningActive", isChecked);
                 editor.commit();
             }
@@ -195,9 +221,17 @@ public class SettingsActivity extends AppCompatActivity {
         swc_difficulty.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean("difficultyActive", isChecked);
+                editor.commit();
+            }
+        });
+
+        swc_showMenuButtons = (Switch)findViewById(R.id.swc_showMenuButtons);
+        swc_showMenuButtons.setChecked(settings.getBoolean("showMenuButtons", true));
+        swc_showMenuButtons.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                editor.putBoolean("showMenuButtons", isChecked);
                 editor.commit();
             }
         });

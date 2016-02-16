@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     TextView lbl_meaning;
     TextView lbl_difficulty;
     TextView lbl_paused;
+    RelativeLayout con_buttons;
 
     Handler timerHandler;
     Runnable timerRunnable;
@@ -44,19 +46,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
-
-        showFurigana = settings.getBoolean("furiganaActive", true);
-        showKanji = settings.getBoolean("kanjiActive", true);
-        showMeaning = settings.getBoolean("meaningActive", true);
-        showDifficulty = settings.getBoolean("difficultyActive", true);
+        //setTheme(MainActivity.getThemeId(settings));
+        super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
 
         RelativeLayout main = (RelativeLayout)findViewById(R.id.con_main);
-        main.setOnTouchListener(new OnSwipeTouchListener(MainActivity.this) {
+        lbl_furigana = (TextView)findViewById(R.id.lbl_furigana);
+        lbl_kanji = (TextView)findViewById(R.id.lbl_kanji);
+        lbl_meaning = (TextView)findViewById(R.id.lbl_meaning);
+        lbl_difficulty = (TextView)findViewById(R.id.lbl_difficulty);
+        lbl_paused = (TextView)findViewById(R.id.lbl_paused);
+        con_buttons = (RelativeLayout)findViewById(R.id.con_buttons);
+
+        OnSwipeTouchListener swiperListener = new OnSwipeTouchListener(MainActivity.this) {
             public void onSwipeTop() {
                 Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
             }
@@ -76,13 +80,9 @@ public class MainActivity extends AppCompatActivity {
             public void onSwipeBottom() {
                 Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
             }
-        });
+        };
 
-        lbl_furigana = (TextView)findViewById(R.id.lbl_furigana);
-        lbl_kanji = (TextView)findViewById(R.id.lbl_kanji);
-        lbl_meaning = (TextView)findViewById(R.id.lbl_meaning);
-        lbl_difficulty = (TextView)findViewById(R.id.lbl_difficulty);
-        lbl_paused = (TextView)findViewById(R.id.lbl_paused);
+        main.setOnTouchListener(swiperListener);
 
         lbl_paused.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,8 +93,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         hideAnswer();
-
-        setQuestionMode(settings);
+        initializeViews(settings);
 
         Button btn_toInput = (Button)findViewById(R.id.btn_toInput);
         btn_toInput.setOnClickListener(new View.OnClickListener() {
@@ -118,9 +117,63 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        initializeKanji();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
+        initializeKanji();
+        hideAnswer();
+        initializeViews(settings);
+    }
+
+    public static int getThemeId(SharedPreferences settings) {
+        switch((int)settings.getLong("appTheme", 0L)) {
+            case 1:
+                return R.style.AppThemeLight;
+            case 2:
+                return R.style.AppThemeDark;
+            default:
+                return R.style.AppThemeBlue;
+        }
+    }
+
+    private void initializeViews(SharedPreferences settings) {
+        showFurigana = settings.getBoolean("furiganaActive", true);
+        showKanji = settings.getBoolean("kanjiActive", true);
+        showMeaning = settings.getBoolean("meaningActive", true);
+        showDifficulty = settings.getBoolean("difficultyActive", true);
+        con_buttons.setVisibility(settings.getBoolean("showMenuButtons", true) ? View.VISIBLE : View.INVISIBLE);
+
+        setQuestionMode(settings);
+    }
+
+    private void initializeKanji() {
         kanjiList = getKanjiFromDatabase();
         Log.d("array", "array: " + Arrays.toString(kanjiArray));
-        getKanji(kanjiArray[currentIndex]);
+        if(kanjiArray.length > 0)
+            getKanji(kanjiArray[currentIndex]);
+        else {
+            getKanji(0);
+
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            callInputActivity();
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //Do nothing, close dialog
+                            break;
+                    }
+                }
+            };
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage(getString(R.string.mainWelcomeMessage)).setPositiveButton(getString(R.string.mainAddNew), dialogClickListener).setNegativeButton(getString(R.string.mainCancel), dialogClickListener).show();
+        }
     }
 
     @Override
@@ -135,14 +188,19 @@ public class MainActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(item.getItemId()) {
+            case R.id.action_settings:
+                callSettings();
+                return true;
+            case R.id.action_kanjilist:
+                callKanjiList();
+                return true;
+            case R.id.action_input:
+                callInputActivity();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private ArrayList<Kanji> getKanjiFromDatabase() {
@@ -170,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                 sortOrder
         );
 
-        if(cursor != null) {
+        if (cursor != null) {
             ArrayList<Kanji> kanji = new ArrayList<>();
             cursor.moveToFirst();
 
@@ -237,6 +295,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ProgressBar bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
         bar_timer.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
+        lbl_paused.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
 
         if(mode == 0) {
             timerMaxReveal = settings.getInt("secondsToReveal", 60);
@@ -304,21 +363,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void callInputActivity() {
+        timerPaused = true;
+        if(timerHandler != null)
+            timerHandler.removeCallbacks(timerRunnable);
         Intent intent = new Intent(this, InputActivity.class);
         startActivity(intent);
-        timerPaused = true;
     }
 
     private void callKanjiList() {
+        timerPaused = true;
+        if(timerHandler != null)
+            timerHandler.removeCallbacks(timerRunnable);
         Intent intent = new Intent(this, ListActivity.class);
         startActivity(intent);
-        timerPaused = true;
     }
 
     private void callSettings() {
+        timerPaused = true;
+        if(timerHandler != null)
+            timerHandler.removeCallbacks(timerRunnable);
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
-        timerPaused = true;
     }
 
     static void FisherYatesShuffleArray(int[] array)
