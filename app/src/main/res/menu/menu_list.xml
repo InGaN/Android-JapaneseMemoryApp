@@ -3,6 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.kevin.japanesememoryapp.ListActivity">
     <item
+        android:id="@+id/action_sortDifficulty"
+        android:title="@string/action_sortDifficulty"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_sortID"
+        android:title="@string/action_sortID"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_input"
         android:title="@string/action_input"
         android:orderInCategory="100"

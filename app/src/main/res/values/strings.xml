@@ -14,6 +14,8 @@
     <string name="action_settings">Settings</string>
     <string name="action_kanjilist">Kanji list</string>
     <string name="action_input">Add new Kanji</string>
+    <string name="action_sortDifficulty">Sort on Difficulty</string>
+    <string name="action_sortID">Sort on ID</string>
 
     <string name="title_activity_input">InputActivity</string>
     <string name="title_activity_list">ListActivity</string>

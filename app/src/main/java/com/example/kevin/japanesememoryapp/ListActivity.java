@@ -22,6 +22,8 @@ import java.util.ArrayList;
 public class ListActivity extends AppCompatActivity {
     FeedReaderDbHelper dbHelper;
     ListView kanjiList;
+    boolean sortDifficulty;
+    boolean sortID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +33,7 @@ public class ListActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_list);
 
-        fillListWithKanji(getKanjiFromDatabase());
+        fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID));
     }
 
     private void applyTheme(SharedPreferences settings) {
@@ -51,7 +53,7 @@ public class ListActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        fillListWithKanji(getKanjiFromDatabase());
+        fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID));
     }
 
     @Override
@@ -69,6 +71,14 @@ public class ListActivity extends AppCompatActivity {
         switch(item.getItemId()) {
             case R.id.action_input:
                 callInputActivity();
+                return true;
+            case R.id.action_sortDifficulty:
+                sortDifficulty = !sortDifficulty;
+                fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY , sortDifficulty));
+                return true;
+            case R.id.action_sortID:
+                sortID = !sortID;
+                fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -171,7 +181,7 @@ public class ListActivity extends AppCompatActivity {
         builder.setMessage(getString(R.string.mainAreYouSure) + " ID: " + kanji.get(key).getKanjiID() + " " + kanji.get(key).getKanji() + "?").setPositiveButton(getString(R.string.delete), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
     }
 
-    private ArrayList<Kanji> getKanjiFromDatabase() {
+    private ArrayList<Kanji> getKanjiFromDatabase(String sortType, boolean asc) {
         dbHelper = new FeedReaderDbHelper(ListActivity.this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -183,7 +193,7 @@ public class ListActivity extends AppCompatActivity {
                 FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY
         };
 
-        String sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " ASC";
+        String sortOrder = sortType + ((asc) ? " ASC" : " DESC");
 
         Cursor cursor = db.query(
                 FeedReaderContract.FeedEntry.TABLE_NAME,                    // The table to query

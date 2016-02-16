@@ -30,11 +30,13 @@ public class CustomListAdapter extends ArrayAdapter<Kanji> {
         TextView lbl_kanji = (TextView) rowView.findViewById(R.id.lbl_item_kanji);
         TextView lbl_furigana = (TextView) rowView.findViewById(R.id.lbl_item_furigana);
         TextView lbl_meaning = (TextView) rowView.findViewById(R.id.lbl_item_meaning);
+        TextView lbl_difficulty = (TextView) rowView.findViewById(R.id.lbl_item_difficulty);
 
-        lbl_id.setText("ID: " + kanji.get(position).getKanjiID());
+        lbl_id.setText("" + kanji.get(position).getKanjiID());
         lbl_kanji.setText(kanji.get(position).getKanji());
         lbl_furigana.setText(kanji.get(position).getFurigana());
         lbl_meaning.setText(kanji.get(position).getMeaning());
+        lbl_difficulty.setText(kanji.get(position).getDifficulty() + "/9");
 
         return rowView;
     }
