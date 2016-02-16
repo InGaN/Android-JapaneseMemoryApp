@@ -2,6 +2,7 @@ package com.example.kevin.japanesememoryapp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AlertDialog;
@@ -24,11 +25,27 @@ public class ListActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
+        applyTheme(settings);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_list);
 
         fillListWithKanji(getKanjiFromDatabase());
+    }
+
+    private void applyTheme(SharedPreferences settings) {
+        switch((int)settings.getLong("themeSelection", 0L)) {
+            case 0:
+                setTheme(R.style.AppThemeLight);
+                break;
+            case 1:
+                setTheme(R.style.AppThemeDark);
+                break;
+            default:
+                setTheme(R.style.AppThemeBlue);
+                break;
+        }
     }
 
     @Override
@@ -40,7 +57,7 @@ public class ListActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_list, menu);
+        getMenuInflater().inflate(R.menu.menu_list, menu);
         return true;
     }
 
@@ -49,14 +66,13 @@ public class ListActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(item.getItemId()) {
+            case R.id.action_input:
+                callInputActivity();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void fillListWithKanji(final ArrayList<Kanji> kanji) {

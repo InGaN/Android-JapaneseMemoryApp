@@ -169,7 +169,7 @@
             android:layout_height="wrap_content"
             android:padding="3dp"/>
         <Spinner
-            android:id="@+id/spn_themes"
+            android:id="@+id/spn_themeSets"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
     </TableRow>

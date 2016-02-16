@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
-        //setTheme(MainActivity.getThemeId(settings));
+        applyTheme(settings);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
@@ -120,24 +121,28 @@ public class MainActivity extends AppCompatActivity {
         initializeKanji();
     }
 
+    private void applyTheme(SharedPreferences settings) {
+        switch((int)settings.getLong("themeSelection", 0L)) {
+            case 0:
+                setTheme(R.style.AppThemeLight);
+                break;
+            case 1:
+                setTheme(R.style.AppThemeDark);
+                break;
+            default:
+                setTheme(R.style.AppThemeDark);
+                break;
+        }
+    }
+
     @Override
     public void onResume() {
-        super.onResume();
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
+        applyTheme(settings);
+        super.onResume();
         initializeKanji();
         hideAnswer();
         initializeViews(settings);
-    }
-
-    public static int getThemeId(SharedPreferences settings) {
-        switch((int)settings.getLong("appTheme", 0L)) {
-            case 1:
-                return R.style.AppThemeLight;
-            case 2:
-                return R.style.AppThemeDark;
-            default:
-                return R.style.AppThemeBlue;
-        }
     }
 
     private void initializeViews(SharedPreferences settings) {

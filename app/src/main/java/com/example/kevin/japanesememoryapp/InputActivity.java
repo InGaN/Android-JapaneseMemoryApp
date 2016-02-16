@@ -3,6 +3,7 @@ package com.example.kevin.japanesememoryapp;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.renderscript.ScriptGroup;
 import android.support.v7.app.AlertDialog;
@@ -31,6 +32,8 @@ public class InputActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
+        applyTheme(settings);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input);
 
@@ -75,6 +78,20 @@ public class InputActivity extends AppCompatActivity {
                     updateKanji(currentKanji.getKanjiID());
                 }
             });
+        }
+    }
+
+    private void applyTheme(SharedPreferences settings) {
+        switch((int)settings.getLong("themeSelection", 0L)) {
+            case 0:
+                setTheme(R.style.AppThemeLight);
+                break;
+            case 1:
+                setTheme(R.style.AppThemeDark);
+                break;
+            default:
+                setTheme(R.style.AppThemeBlue);
+                break;
         }
     }
 

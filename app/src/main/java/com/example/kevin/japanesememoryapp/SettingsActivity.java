@@ -1,10 +1,12 @@
 package com.example.kevin.japanesememoryapp;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,7 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-        //setTheme(MainActivity.getThemeId(settings));
+        applyTheme(settings);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_settings);
@@ -44,14 +46,26 @@ public class SettingsActivity extends AppCompatActivity {
         lbl_about.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.showAlert(SettingsActivity.this, getString(R.string.aboutTitle), getString(R.string.aboutMessage) +"\r"+ getString(R.string.aboutWebsite));
+                MainActivity.showAlert(SettingsActivity.this, getString(R.string.aboutTitle), getString(R.string.aboutMessage) + "\r" + getString(R.string.aboutWebsite));
             }
         });
 
         initializeItems(settings);
     }
 
-
+    private void applyTheme(SharedPreferences settings) {
+        switch((int)settings.getLong("themeSelection", 0L)) {
+            case 0:
+                setTheme(R.style.AppThemeLight);
+                break;
+            case 1:
+                setTheme(R.style.AppThemeDark);
+                break;
+            default:
+                setTheme(R.style.AppThemeBlue);
+                break;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -88,7 +102,6 @@ public class SettingsActivity extends AppCompatActivity {
         spn_questionMode.setAdapter(adapter1);
 
         spn_questionMode.setSelection((int) settings.getLong("questionMode", 0L));
-
         spn_questionMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -98,36 +111,40 @@ public class SettingsActivity extends AppCompatActivity {
                 editor.commit();
                 visibleTimerOptions((id == 0));
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
-        /*spn_themes = (Spinner)findViewById(R.id.spn_themes);
-        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.selectableThemes, android.R.layout.simple_spinner_item);
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spn_themes.setAdapter(adapter2);
+        spn_themes = (Spinner)findViewById(R.id.spn_themeSets);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.selectableThemes, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_themes.setAdapter(adapter);
 
-        spn_themes.setSelection((int) settings.getLong("appTheme", 0L));
-
+        spn_themes.setSelection((int) settings.getLong("themeSelection", 0L));
         spn_themes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
-                editor.putLong("appTheme", id);
+                editor.putLong("themeSelection", id);
                 editor.commit();
-                finish();
-                startActivity(getIntent());
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
-        }); */
+        });
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void setEditTexts(SharedPreferences settings) {
