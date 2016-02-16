@@ -5,6 +5,11 @@
     <string name="error">error</string>
     <string name="paused">paused</string>
     <string name="resume">resuming</string>
+    <string name="edit">edit</string>
+    <string name="cancel">cancel</string>
+    <string name="delete">delete</string>
+    <string name="addNew">Add new</string>
+    <string name="ok">OK</string>
 
     <string name="action_settings">Settings</string>
     <string name="action_kanjilist">Kanji list</string>
@@ -17,8 +22,7 @@
     <string name="mainWelcomeTitle">Welcome to </string>
     <string name="mainWelcomeMessage">Welcome, please start by adding your first Kanji</string>
     <string name="mainEmptyListMessage">Your list is empty, please start by adding your first Kanji</string>
-    <string name="mainAddNew">Add new</string>
-    <string name="mainCancel">Cancel</string>
+    <string name="mainAreYouSure">Are you sure you want to delete: </string>
 
     <string name="settingsAbout">About this application</string>
     <string name="settingsQuestionMode">Questioning mode</string>
@@ -51,11 +55,14 @@
     <string name="themeDark">Dark</string>
 
     <string name="inputAddNewKanji">insert new Kanji</string>
+    <string name="inputEditKanji">editing Kanji: </string>
     <string name="inputHintFurigana">Furigana...</string>
     <string name="inputHintKanji">Kanji...</string>
     <string name="inputHintMeaning">Meaning...</string>
     <string name="inputUnableToAdd">Unable to enter new kanji to list...</string>
     <string name="inputNewKanjiAdded">New kanji added to list</string>
     <string name="inputFillInAllPlease">Please fill in all input areas</string>
+    <string name="inputUpdateWrong">Unable to update kanji</string>
+    <string name="inputUpdateSuccess">Kanji has been updated</string>
 
 </resources>

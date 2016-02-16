@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setMessage(getString(R.string.mainWelcomeMessage)).setPositiveButton(getString(R.string.mainAddNew), dialogClickListener).setNegativeButton(getString(R.string.mainCancel), dialogClickListener).show();
+            builder.setMessage(getString(R.string.mainWelcomeMessage)).setPositiveButton(getString(R.string.addNew), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
         }
     }
 

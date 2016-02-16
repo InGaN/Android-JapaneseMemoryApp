@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -27,6 +28,12 @@ public class ListActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_list);
 
+        fillListWithKanji(getKanjiFromDatabase());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         fillListWithKanji(getKanjiFromDatabase());
     }
 
@@ -55,11 +62,41 @@ public class ListActivity extends AppCompatActivity {
     private void fillListWithKanji(final ArrayList<Kanji> kanji) {
         TextView lbl_emptyList = (TextView)findViewById(R.id.lbl_emptyList);
         lbl_emptyList.setVisibility((kanji.size() > 0) ? View.GONE : View.VISIBLE);
+
         if(kanji.size() > 0) {
             CustomListAdapter customListAdapter = new CustomListAdapter(this, kanji);
 
             kanjiList = (ListView) findViewById(R.id.lst_kanjiList);
             kanjiList.setAdapter(customListAdapter);
+
+            kanjiList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    final int index = position;
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which) {
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    editKanji(kanji.get(index));
+                                    break;
+                                case DialogInterface.BUTTON_NEUTRAL:
+                                    deleteKanji(index, kanji);
+                                    break;
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    //Do nothing, close dialog
+                                    break;
+                            }
+                        }
+                    };
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
+                    builder.setMessage("ID:" + kanji.get(position).getKanjiID() + " " + kanji.get(position).getKanji())
+                            .setPositiveButton(getString(R.string.edit), dialogClickListener)
+                            .setNegativeButton(getString(R.string.cancel), dialogClickListener)
+                            .setNeutralButton(getString(R.string.delete), dialogClickListener).show();
+                    return false;
+                }
+            });
         }
         else {
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -76,8 +113,14 @@ public class ListActivity extends AppCompatActivity {
                 }
             };
             AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
-            builder.setMessage(getString(R.string.mainEmptyListMessage)).setPositiveButton(getString(R.string.mainAddNew), dialogClickListener).setNegativeButton(getString(R.string.mainCancel), dialogClickListener).show();
+            builder.setMessage(getString(R.string.mainEmptyListMessage)).setPositiveButton(getString(R.string.addNew), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
         }
+    }
+
+    private void editKanji(Kanji kanji){
+        Intent intent = new Intent(this, InputActivity.class);
+        intent.putExtra("incoming_kanji", kanji);
+        startActivity(intent);
     }
 
     private void callInputActivity() {
@@ -85,9 +128,35 @@ public class ListActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void deleteKanji(final int key, final ArrayList<Kanji> kanji) {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        dbHelper = new FeedReaderDbHelper(ListActivity.this);
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+                        db.delete(
+                                FeedReaderContract.FeedEntry.TABLE_NAME,
+                                FeedReaderContract.FeedEntry.COLUMN_NAME_ID + "=" + kanji.get(key).getKanjiID(),
+                                null
+                        );
+                        finish();
+                        startActivity(getIntent());
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //Do nothing, close dialog
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
+        builder.setMessage(getString(R.string.mainAreYouSure) + " ID: " + kanji.get(key).getKanjiID() + " " + kanji.get(key).getKanji() + "?").setPositiveButton(getString(R.string.delete), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
+    }
+
     private ArrayList<Kanji> getKanjiFromDatabase() {
         dbHelper = new FeedReaderDbHelper(ListActivity.this);
-
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         String[] selectQuery = {

@@ -1,8 +1,11 @@
 package com.example.kevin.japanesememoryapp;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.renderscript.ScriptGroup;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,24 +13,33 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class InputActivity extends AppCompatActivity {
     public static int DEFAULT_DIFFICULTY = 5;
 
     FeedReaderDbHelper dbHelper;
 
+    TextView lbl_addKanji;
     EditText tbx_furigana;
     EditText tbx_kanji;
     EditText tbx_meaning;
+    Button btn_addNewKanji;
+    Button btn_editKanji;
+
+    Kanji currentKanji;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input);
 
+        lbl_addKanji = (TextView)findViewById(R.id.lbl_addKanji);
         tbx_furigana = (EditText)findViewById(R.id.tbx_addFurigana);
         tbx_kanji = (EditText)findViewById(R.id.tbx_addKanji);
         tbx_meaning = (EditText)findViewById(R.id.tbx_addMeaning);
+        btn_addNewKanji = (Button)findViewById(R.id.btn_addNewKanji);
+        btn_editKanji = (Button)findViewById(R.id.btn_editKanji);
 
         Button btn_addKanji = (Button)findViewById(R.id.btn_addNewKanji);
         btn_addKanji.setOnClickListener(new View.OnClickListener() {
@@ -43,6 +55,27 @@ public class InputActivity extends AppCompatActivity {
         });
 
         dbHelper = new FeedReaderDbHelper(InputActivity.this);
+
+
+        Intent intent = getIntent();
+        currentKanji = (Kanji)intent.getParcelableExtra("incoming_kanji");
+
+        if(currentKanji != null) {
+            btn_addKanji.setVisibility(View.GONE);
+            btn_editKanji.setVisibility(View.VISIBLE);
+
+            lbl_addKanji.setText(getString(R.string.inputEditKanji) + " ID:" + currentKanji.getKanjiID());
+            tbx_furigana.setText(currentKanji.getFurigana());
+            tbx_kanji.setText(currentKanji.getKanji());
+            tbx_meaning.setText(currentKanji.getMeaning());
+
+            btn_editKanji.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    updateKanji(currentKanji.getKanjiID());
+                }
+            });
+        }
     }
 
     @Override
@@ -91,7 +124,33 @@ public class InputActivity extends AppCompatActivity {
             tbx_kanji.setText("");
             tbx_meaning.setText("");
         }
+    }
 
+    private void updateKanji(int index) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_FURIGANA, tbx_furigana.getText().toString());
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_KANJI, tbx_kanji.getText().toString());
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_MEANING, tbx_meaning.getText().toString());
+
+        if(db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + index, null) > 0) {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            finish();
+                            break;
+                    }
+                }
+            };
+            AlertDialog.Builder builder = new AlertDialog.Builder(InputActivity.this);
+            builder.setMessage(getString(R.string.inputUpdateSuccess)).setPositiveButton(getString(R.string.ok), dialogClickListener).show();
+        }
+        else {
+            MainActivity.showAlert(InputActivity.this, getString(R.string.error), getString(R.string.inputUpdateWrong));
+        }
     }
 
     private boolean verifyInput() {
