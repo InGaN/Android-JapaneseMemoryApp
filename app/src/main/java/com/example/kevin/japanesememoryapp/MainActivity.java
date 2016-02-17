@@ -34,9 +34,11 @@ public class MainActivity extends AppCompatActivity {
     TextView lbl_difficulty;
     TextView lbl_paused;
     RelativeLayout con_buttons;
+    ProgressBar bar_timer;
 
-    Handler timerHandler;
-    Runnable timerRunnable;
+    private Handler timerHandler;
+    private Runnable timerRunnable;
+
     int timerIndex = 0;
     int timerMaxReveal, timerMaxNext;
     boolean timerRevealing = true;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         lbl_difficulty = (TextView)findViewById(R.id.lbl_difficulty);
         lbl_paused = (TextView)findViewById(R.id.lbl_paused);
         con_buttons = (RelativeLayout)findViewById(R.id.con_buttons);
+        bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
 
         OnSwipeTouchListener swiperListener = new OnSwipeTouchListener(MainActivity.this) {
             public void onSwipeTop() {
@@ -85,16 +88,20 @@ public class MainActivity extends AppCompatActivity {
 
         main.setOnTouchListener(swiperListener);
 
+        initializeKanji();
+        hideAnswer();
+        initializeViews(settings);
+        createTimer(settings, bar_timer);
+        setQuestionMode(settings);
+
         lbl_paused.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 timerPaused = !timerPaused;
+                timerHandler.postDelayed(timerRunnable, 1000);
                 Toast.makeText(MainActivity.this, (timerPaused) ? getString(R.string.paused) : getString(R.string.resume), Toast.LENGTH_SHORT).show();
             }
         });
-
-        hideAnswer();
-        initializeViews(settings);
 
         Button btn_toInput = (Button)findViewById(R.id.btn_toInput);
         btn_toInput.setOnClickListener(new View.OnClickListener() {
@@ -117,8 +124,6 @@ public class MainActivity extends AppCompatActivity {
                 callSettings();
             }
         });
-
-        initializeKanji();
     }
 
     private void applyTheme(SharedPreferences settings) {
@@ -143,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         initializeKanji();
         hideAnswer();
         initializeViews(settings);
+        setQuestionMode(settings);
     }
 
     private void initializeViews(SharedPreferences settings) {
@@ -151,8 +157,6 @@ public class MainActivity extends AppCompatActivity {
         showMeaning = settings.getBoolean("meaningActive", true);
         showDifficulty = settings.getBoolean("difficultyActive", true);
         con_buttons.setVisibility(settings.getBoolean("showMenuButtons", true) ? View.VISIBLE : View.INVISIBLE);
-
-        setQuestionMode(settings);
     }
 
     private void initializeKanji() {
@@ -298,60 +302,55 @@ public class MainActivity extends AppCompatActivity {
     private void setQuestionMode(SharedPreferences settings) {
         long mode = settings.getLong("questionMode", 0L);
 
-        final ProgressBar bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
         bar_timer.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
         lbl_paused.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
 
         if(mode == 0) {
-            timerMaxReveal = settings.getInt("secondsToReveal", 60);
-            timerMaxNext = settings.getInt("secondsToNext", 10);
-            bar_timer.setMax(timerMaxReveal);
-            timerHandler = new Handler();
-            timerRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    if(!timerPaused) {
-                        lbl_paused.setVisibility(View.INVISIBLE);
-                        bar_timer.setProgress(timerIndex);
-                        timerIndex++;
-                        timerHandler.postDelayed(timerRunnable, 1000);
-                        if (timerRevealing) {
-                            if (timerIndex > timerMaxReveal + 1) {
-                                timerRevealing = false;
-                                bar_timer.setMax(timerMaxNext);
-                                bar_timer.setProgress(0);
-                                timerIndex = 0;
-                                showAnswer();
-                            }
-                        }
-                        else {
-                            if (timerIndex > timerMaxNext + 1) {
-                                timerRevealing = true;
-                                bar_timer.setMax(timerMaxReveal);
-                                bar_timer.setProgress(0);
-                                timerIndex = 0;
-                                hideAnswer();
-                                currentIndex = (currentIndex + 1) % kanjiList.size();
-                                getKanji(currentIndex);
-                            }
-                        }
-                    }
-                    else {
-                        lbl_paused.setVisibility(View.VISIBLE);
-                        timerHandler.postDelayed(timerRunnable, 1000);
-                    }
-                }
-            };
-            timerHandler.postDelayed(timerRunnable, 1000);
+            Toast.makeText(MainActivity.this, getString(R.string.modeTimed), Toast.LENGTH_SHORT).show();
         }
         else if(mode == 1) {
-            lbl_kanji.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showAnswer();
-                }
-            });
+            // implement proper mode
+            Toast.makeText(MainActivity.this, getString(R.string.modeTapped), Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private void createTimer(SharedPreferences settings, final ProgressBar bar_timer) {
+        timerMaxReveal = settings.getInt("secondsToReveal", 7);
+        timerMaxNext = settings.getInt("secondsToNext", 3);
+        bar_timer.setMax(timerMaxReveal);
+
+        timerHandler = new Handler();
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                lbl_paused.setVisibility(View.INVISIBLE);
+                bar_timer.setProgress(timerIndex);
+                timerIndex++;
+
+                if (timerRevealing) {
+                    if (timerIndex > timerMaxReveal + 1) {
+                        timerRevealing = false;
+                        bar_timer.setMax(timerMaxNext);
+                        bar_timer.setProgress(0);
+                        timerIndex = 0;
+                        showAnswer();
+                    }
+                }
+                else {
+                    if (timerIndex > timerMaxNext + 1) {
+                        timerRevealing = true;
+                        bar_timer.setMax(timerMaxReveal);
+                        bar_timer.setProgress(0);
+                        timerIndex = 0;
+                        hideAnswer();
+                        currentIndex = (currentIndex + 1) % kanjiList.size();
+                        getKanji(currentIndex);
+                    }
+                }
+                timerHandler.postDelayed(this, 1000);
+            }
+        };
     }
 
     public static void showAlert(Context context, String title, String message) {

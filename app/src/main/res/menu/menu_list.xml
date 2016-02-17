@@ -5,16 +5,16 @@
     <item
         android:id="@+id/action_sortDifficulty"
         android:title="@string/action_sortDifficulty"
-        android:orderInCategory="100"
+        android:orderInCategory="1"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_sortID"
         android:title="@string/action_sortID"
-        android:orderInCategory="100"
+        android:orderInCategory="2"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_input"
         android:title="@string/action_input"
-        android:orderInCategory="100"
+        android:orderInCategory="3"
         app:showAsAction="never" />
 </menu>

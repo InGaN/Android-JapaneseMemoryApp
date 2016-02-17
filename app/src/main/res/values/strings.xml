@@ -26,6 +26,9 @@
     <string name="mainEmptyListMessage">Your list is empty, please start by adding your first Kanji</string>
     <string name="mainAreYouSure">Are you sure you want to delete: </string>
 
+    <string name="modeTimed">Timer mode active</string>
+    <string name="modeTapped">Tapped mode active</string>
+
     <string name="settingsAbout">About this application</string>
     <string name="settingsQuestionMode">Questioning mode</string>
     <string name="settingsTimerModeSecondsReveal">Seconds until reveal:</string>
