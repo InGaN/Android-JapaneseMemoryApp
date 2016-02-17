@@ -29,6 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
     Switch swc_difficulty;
     Switch swc_showMenuButtons;
     Spinner spn_questionMode;
+    Spinner spn_inputMode;
     Spinner spn_themes;
     EditText tbx_secondsReveal;
     EditText tbx_secondsNext;
@@ -128,6 +129,26 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("themeSelection", id);
+                editor.commit();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        spn_inputMode = (Spinner)findViewById(R.id.spn_inputMode);
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.inputModes, android.R.layout.simple_spinner_item);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_inputMode.setAdapter(adapter2);
+
+        spn_inputMode.setSelection((int) settings.getLong("inputMode", 0L));
+        spn_inputMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putLong("inputMode", id);
                 editor.commit();
             }
 

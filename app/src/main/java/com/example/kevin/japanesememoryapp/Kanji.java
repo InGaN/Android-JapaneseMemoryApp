@@ -67,10 +67,12 @@ public class Kanji implements Parcelable {
     public byte getDifficulty() {
         return this.difficulty;
     }
-    public void incrementDifficulty() {
-        this.difficulty++;
-    }
-    public void decrementDifficulty() {
-        this.difficulty--;
+    public void changeDifficulty(int modifier) {
+        if (difficulty + modifier < 0)
+            difficulty = 0;
+        else if (difficulty + modifier > 9)
+            difficulty = 9;
+        else
+            difficulty += modifier;
     }
 }

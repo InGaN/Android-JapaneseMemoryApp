@@ -1,5 +1,6 @@
 package com.example.kevin.japanesememoryapp;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,8 +35,12 @@ public class MainActivity extends AppCompatActivity {
     TextView lbl_meaning;
     TextView lbl_difficulty;
     TextView lbl_paused;
-    RelativeLayout con_buttons;
+    RelativeLayout con_menuButtons;
     ProgressBar bar_timer;
+    EditText tbx_input;
+    RelativeLayout con_yesNoButtons;
+    Button btn_no;
+    Button btn_yes;
 
     private Handler timerHandler;
     private Runnable timerRunnable;
@@ -61,8 +67,34 @@ public class MainActivity extends AppCompatActivity {
         lbl_meaning = (TextView)findViewById(R.id.lbl_meaning);
         lbl_difficulty = (TextView)findViewById(R.id.lbl_difficulty);
         lbl_paused = (TextView)findViewById(R.id.lbl_paused);
-        con_buttons = (RelativeLayout)findViewById(R.id.con_buttons);
+        con_menuButtons = (RelativeLayout)findViewById(R.id.con_menuButtons);
         bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
+        tbx_input = (EditText)findViewById(R.id.tbx_input);
+        con_yesNoButtons = (RelativeLayout)findViewById(R.id.con_yesNoButtons);
+        btn_no = (Button)findViewById(R.id.btn_no);
+        btn_yes = (Button)findViewById(R.id.btn_yes);
+        btn_no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "ID: " +kanjiList.get(currentIndex).getKanjiID(), Toast.LENGTH_SHORT).show();
+                kanjiList.get(currentIndex).changeDifficulty(1);
+                lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
+                changeDifficultyInDatabase(kanjiList.get(currentIndex));
+                btn_no.setEnabled(false);
+                btn_yes.setEnabled(false);
+            }
+        });
+        btn_yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "ID: " +kanjiList.get(currentIndex).getKanjiID(), Toast.LENGTH_SHORT).show();
+                kanjiList.get(currentIndex).changeDifficulty(-1);
+                lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
+                changeDifficultyInDatabase(kanjiList.get(currentIndex));
+                btn_no.setEnabled(false);
+                btn_yes.setEnabled(false);
+            }
+        });
 
         OnSwipeTouchListener swiperListener = new OnSwipeTouchListener(MainActivity.this) {
             public void onSwipeTop() {
@@ -93,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
         initializeViews(settings);
         createTimer(settings, bar_timer);
         setQuestionMode(settings);
+        setInputMode(settings);
+
+
 
         lbl_paused.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
         hideAnswer();
         initializeViews(settings);
         setQuestionMode(settings);
+        setInputMode(settings);
     }
 
     private void initializeViews(SharedPreferences settings) {
@@ -156,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         showKanji = settings.getBoolean("kanjiActive", true);
         showMeaning = settings.getBoolean("meaningActive", true);
         showDifficulty = settings.getBoolean("difficultyActive", true);
-        con_buttons.setVisibility(settings.getBoolean("showMenuButtons", true) ? View.VISIBLE : View.INVISIBLE);
+        con_menuButtons.setVisibility(settings.getBoolean("showMenuButtons", true) ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void initializeKanji() {
@@ -261,6 +297,15 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    private void changeDifficultyInDatabase(Kanji kanji) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, kanji.getDifficulty());
+
+        db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + kanji.getKanjiID(), null);
+    }
+
     private void getKanji(int index) {
         if(kanjiList != null) {
             if (kanjiList.size() > 0) {
@@ -291,12 +336,19 @@ public class MainActivity extends AppCompatActivity {
         lbl_furigana.setVisibility(View.VISIBLE);
         lbl_kanji.setVisibility(View.VISIBLE);
         lbl_meaning.setVisibility(View.VISIBLE);
+        btn_no.setEnabled(true);
+        btn_yes.setEnabled(true);
+        tbx_input.setEnabled(false);
     }
+
     private void hideAnswer() {
         lbl_furigana.setVisibility((showFurigana) ? View.VISIBLE : View.INVISIBLE);
         lbl_kanji.setVisibility((showKanji) ? View.VISIBLE : View.INVISIBLE);
         lbl_meaning.setVisibility((showMeaning) ? View.VISIBLE : View.INVISIBLE);
         lbl_difficulty.setVisibility((showDifficulty) ? View.VISIBLE : View.INVISIBLE);
+        btn_no.setEnabled(false);
+        btn_yes.setEnabled(false);
+        tbx_input.setEnabled(true);
     }
 
     private void setQuestionMode(SharedPreferences settings) {
@@ -312,6 +364,12 @@ public class MainActivity extends AppCompatActivity {
             // implement proper mode
             Toast.makeText(MainActivity.this, getString(R.string.modeTapped), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void setInputMode(SharedPreferences settings) {
+        long mode = settings.getLong("inputMode", 0L);
+        tbx_input.setVisibility((mode == 0) ? View.VISIBLE : View.GONE);
+        con_yesNoButtons.setVisibility((mode == 1) ? View.VISIBLE : View.GONE);
     }
 
 

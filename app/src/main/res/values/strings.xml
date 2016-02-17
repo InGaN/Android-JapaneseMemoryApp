@@ -10,6 +10,8 @@
     <string name="delete">delete</string>
     <string name="addNew">Add new</string>
     <string name="ok">OK</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
 
     <string name="action_settings">Settings</string>
     <string name="action_kanjilist">Kanji list</string>
@@ -33,15 +35,15 @@
     <string name="settingsQuestionMode">Questioning mode</string>
     <string name="settingsTimerModeSecondsReveal">Seconds until reveal:</string>
     <string name="settingsTimerModeSecondsNext">Seconds until next:</string>
+    <string name="settingInputMode">Input mode</string>
+    <string name="inputModeType">Type</string>
+    <string name="inputMode2Button">Yes/No buttons</string>
+    <string name="inputModeNone">None</string>
     <string name="settingsShowInstructions">During questioning:</string>
     <string name="settingsShowFurigana">Show Furigana</string>
     <string name="settingsShowKanji">Show Kanji</string>
     <string name="settingsShowMeaning">Show Meaning</string>
     <string name="settingsShowDifficulty">Show Difficulty</string>
-    <string name="settingsColorBG">Background color</string>
-    <string name="settingsColorFurigana">Furigana color</string>
-    <string name="settingsColorKanji">Kanji color</string>
-    <string name="settingsColorMeaning">Meaning color</string>
     <string name="settingsShow">show</string>
     <string name="settingsHide">hide</string>
     <string name="settingsNoZero">Values below 1 are not allowed</string>
