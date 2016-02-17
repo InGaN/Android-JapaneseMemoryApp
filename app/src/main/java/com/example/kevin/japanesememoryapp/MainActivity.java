@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     RelativeLayout con_yesNoButtons;
     Button btn_no;
     Button btn_yes;
+    Button btn_reveal;
 
     private Handler timerHandler;
     private Runnable timerRunnable;
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     int timerMaxReveal, timerMaxNext;
     boolean timerRevealing = true;
     boolean timerPaused = true;
+    boolean revealed = false;
+    boolean swipeMode = false;
 
     boolean showFurigana, showKanji, showMeaning, showDifficulty;
     int currentIndex = 0;
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         con_yesNoButtons = (RelativeLayout)findViewById(R.id.con_yesNoButtons);
         btn_no = (Button)findViewById(R.id.btn_no);
         btn_yes = (Button)findViewById(R.id.btn_yes);
+        btn_reveal = (Button)findViewById(R.id.btn_reveal);
         btn_no.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         btn_yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "ID: " +kanjiList.get(currentIndex).getKanjiID(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "ID: " + kanjiList.get(currentIndex).getKanjiID(), Toast.LENGTH_SHORT).show();
                 kanjiList.get(currentIndex).changeDifficulty(-1);
                 lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
                 changeDifficultyInDatabase(kanjiList.get(currentIndex));
@@ -95,29 +99,63 @@ public class MainActivity extends AppCompatActivity {
                 btn_yes.setEnabled(false);
             }
         });
+        btn_reveal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!revealed) {
+                    showAnswer();
+                    btn_reveal.setText(getString(R.string.next));
+                }
+                else {
+                    hideAnswer();
+                    currentIndex = (currentIndex + 1) % kanjiList.size();
+                    getKanji(currentIndex);
+                    btn_reveal.setText(getString(R.string.reveal));
+                }
+            }
+        });
 
         OnSwipeTouchListener swiperListener = new OnSwipeTouchListener(MainActivity.this) {
             public void onSwipeTop() {
-                Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
+                if(swipeMode) {
+                    showAnswer();
+                    Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
+                }
             }
 
             public void onSwipeRight() {
-                Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
-                currentIndex = (currentIndex + 1) % kanjiList.size();
-                getKanji(currentIndex);
+                if(swipeMode) {
+                    Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
+                    if(revealed) {
+                        currentIndex = (currentIndex + 1) % kanjiList.size();
+                        getKanji(currentIndex);
+                    }
+                    else {
+                        showAnswer();
+                    }
+                }
             }
 
             public void onSwipeLeft() {
-                Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
-                currentIndex = (currentIndex - 1 < 0) ? kanjiList.size() - 1 : currentIndex - 1;
-                getKanji(currentIndex);
+                if(swipeMode) {
+                    Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
+                    if(revealed) {
+                        currentIndex = (currentIndex - 1 < 0) ? kanjiList.size() - 1 : currentIndex - 1;
+                        getKanji(currentIndex);
+                    }
+                    else {
+                        showAnswer();
+                    }
+                }
             }
 
             public void onSwipeBottom() {
-                Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+                if(swipeMode) {
+                    showAnswer();
+                    Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+                }
             }
         };
-
         main.setOnTouchListener(swiperListener);
 
         initializeKanji();
@@ -339,6 +377,7 @@ public class MainActivity extends AppCompatActivity {
         btn_no.setEnabled(true);
         btn_yes.setEnabled(true);
         tbx_input.setEnabled(false);
+        revealed = true;
     }
 
     private void hideAnswer() {
@@ -349,6 +388,7 @@ public class MainActivity extends AppCompatActivity {
         btn_no.setEnabled(false);
         btn_yes.setEnabled(false);
         tbx_input.setEnabled(true);
+        revealed = false;
     }
 
     private void setQuestionMode(SharedPreferences settings) {
@@ -356,13 +396,18 @@ public class MainActivity extends AppCompatActivity {
 
         bar_timer.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
         lbl_paused.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
+        swipeMode = (mode == 1);
+        btn_reveal.setVisibility(mode == 2 ? View.VISIBLE : View.GONE);
+
 
         if(mode == 0) {
             Toast.makeText(MainActivity.this, getString(R.string.modeTimed), Toast.LENGTH_SHORT).show();
         }
         else if(mode == 1) {
-            // implement proper mode
-            Toast.makeText(MainActivity.this, getString(R.string.modeTapped), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, getString(R.string.modeSwipe), Toast.LENGTH_SHORT).show();
+        }
+        else if(mode == 2) {
+            Toast.makeText(MainActivity.this, getString(R.string.modeButton), Toast.LENGTH_SHORT).show();
         }
     }
 

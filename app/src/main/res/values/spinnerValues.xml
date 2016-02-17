@@ -2,7 +2,8 @@
 <resources>
     <string-array name="questionModes">
         <item>@string/questionModeTime</item>
-        <item>@string/questionModeTap</item>
+        <item>@string/questionModeSwipe</item>
+        <item>@string/questionModeButton</item>
     </string-array>
     <string-array name="inputModes">
         <item>@string/inputModeType</item>
