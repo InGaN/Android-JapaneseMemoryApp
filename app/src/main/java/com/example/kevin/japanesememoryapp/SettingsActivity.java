@@ -31,6 +31,7 @@ public class SettingsActivity extends AppCompatActivity {
     Spinner spn_questionMode;
     Spinner spn_inputMode;
     Spinner spn_themes;
+    Spinner spn_inputModeType;
     EditText tbx_secondsReveal;
     EditText tbx_secondsNext;
 
@@ -110,7 +111,7 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("questionMode", id);
                 editor.commit();
-                visibleTimerOptions((id == 0));
+                visibleTimerOptions(id == 0);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -149,6 +150,27 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("inputMode", id);
+                editor.commit();
+                visibleInputTypeOptions(id == 0);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        spn_inputModeType = (Spinner)findViewById(R.id.spn_inputModeType);
+        ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.inputModeTypes, android.R.layout.simple_spinner_item);
+        adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_inputModeType.setAdapter(adapter3);
+
+        spn_inputModeType.setSelection((int) settings.getLong("inputModeType", 0L));
+        spn_inputModeType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putLong("inputModeType", id);
                 editor.commit();
             }
 
@@ -278,8 +300,12 @@ public class SettingsActivity extends AppCompatActivity {
     private void visibleTimerOptions(boolean setting) {
         TableRow row1 = (TableRow)findViewById(R.id.row_questionModeTimeReveal);
         TableRow row2 = (TableRow)findViewById(R.id.row_questionModeTimeNext);
-
         row1.setVisibility( (setting) ? View.VISIBLE : View.GONE );
         row2.setVisibility( (setting) ? View.VISIBLE : View.GONE );
+    }
+
+    private void visibleInputTypeOptions(boolean setting) {
+        TableRow row = (TableRow)findViewById(R.id.row_inputModeTypeOptions);
+        row.setVisibility( (setting) ? View.VISIBLE : View.GONE );
     }
 }

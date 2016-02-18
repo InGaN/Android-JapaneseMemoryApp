@@ -13,9 +13,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -52,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
     boolean timerPaused = true;
     boolean revealed = false;
     boolean swipeMode = false;
+    boolean inputMode = false;
+    long inputModeType;
+
+    Kanji currentKanji;
 
     boolean showFurigana, showKanji, showMeaning, showDifficulty;
     int currentIndex = 0;
@@ -73,6 +79,21 @@ public class MainActivity extends AppCompatActivity {
         con_menuButtons = (RelativeLayout)findViewById(R.id.con_menuButtons);
         bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
         tbx_input = (EditText)findViewById(R.id.tbx_input);
+        tbx_input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(actionId == EditorInfo.IME_ACTION_DONE || ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (event.getAction() == KeyEvent.ACTION_DOWN ))) {
+                    showAnswer();
+                    btn_reveal.setText(getString(R.string.next));
+                    revealed = true;
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        });
+
         con_yesNoButtons = (RelativeLayout)findViewById(R.id.con_yesNoButtons);
         btn_no = (Button)findViewById(R.id.btn_no);
         btn_yes = (Button)findViewById(R.id.btn_yes);
@@ -80,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
         btn_no.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "ID: " +kanjiList.get(currentIndex).getKanjiID(), Toast.LENGTH_SHORT).show();
                 kanjiList.get(currentIndex).changeDifficulty(1);
                 lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
                 changeDifficultyInDatabase(kanjiList.get(currentIndex));
@@ -91,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
         btn_yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "ID: " + kanjiList.get(currentIndex).getKanjiID(), Toast.LENGTH_SHORT).show();
                 kanjiList.get(currentIndex).changeDifficulty(-1);
                 lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
                 changeDifficultyInDatabase(kanjiList.get(currentIndex));
@@ -105,11 +124,10 @@ public class MainActivity extends AppCompatActivity {
                 if (!revealed) {
                     showAnswer();
                     btn_reveal.setText(getString(R.string.next));
-                }
-                else {
+                } else {
                     hideAnswer();
                     currentIndex = (currentIndex + 1) % kanjiList.size();
-                    getKanji(currentIndex);
+                    fillLabelsWithKanji();
                     btn_reveal.setText(getString(R.string.reveal));
                 }
             }
@@ -119,16 +137,14 @@ public class MainActivity extends AppCompatActivity {
             public void onSwipeTop() {
                 if(swipeMode) {
                     showAnswer();
-                    Toast.makeText(MainActivity.this, "top", Toast.LENGTH_SHORT).show();
                 }
             }
 
             public void onSwipeRight() {
                 if(swipeMode) {
-                    Toast.makeText(MainActivity.this, "right", Toast.LENGTH_SHORT).show();
                     if(revealed) {
                         currentIndex = (currentIndex + 1) % kanjiList.size();
-                        getKanji(currentIndex);
+                        fillLabelsWithKanji();
                     }
                     else {
                         showAnswer();
@@ -138,10 +154,9 @@ public class MainActivity extends AppCompatActivity {
 
             public void onSwipeLeft() {
                 if(swipeMode) {
-                    Toast.makeText(MainActivity.this, "left", Toast.LENGTH_SHORT).show();
                     if(revealed) {
                         currentIndex = (currentIndex - 1 < 0) ? kanjiList.size() - 1 : currentIndex - 1;
-                        getKanji(currentIndex);
+                        fillLabelsWithKanji();
                     }
                     else {
                         showAnswer();
@@ -152,20 +167,12 @@ public class MainActivity extends AppCompatActivity {
             public void onSwipeBottom() {
                 if(swipeMode) {
                     showAnswer();
-                    Toast.makeText(MainActivity.this, "bottom", Toast.LENGTH_SHORT).show();
                 }
             }
         };
         main.setOnTouchListener(swiperListener);
 
-        initializeKanji();
-        hideAnswer();
-        initializeViews(settings);
         createTimer(settings, bar_timer);
-        setQuestionMode(settings);
-        setInputMode(settings);
-
-
 
         lbl_paused.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,8 +226,8 @@ public class MainActivity extends AppCompatActivity {
         applyTheme(settings);
         super.onResume();
         initializeKanji();
-        hideAnswer();
         initializeViews(settings);
+        hideAnswer();
         setQuestionMode(settings);
         setInputMode(settings);
     }
@@ -236,10 +243,11 @@ public class MainActivity extends AppCompatActivity {
     private void initializeKanji() {
         kanjiList = getKanjiFromDatabase();
         Log.d("array", "array: " + Arrays.toString(kanjiArray));
-        if(kanjiArray.length > 0)
-            getKanji(kanjiArray[currentIndex]);
+        if(kanjiArray.length > 0) {
+            fillLabelsWithKanji();
+        }
         else {
-            getKanji(0);
+            fillLabelsWithKanji();
 
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
@@ -344,16 +352,17 @@ public class MainActivity extends AppCompatActivity {
         db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + kanji.getKanjiID(), null);
     }
 
-    private void getKanji(int index) {
+    private void fillLabelsWithKanji() {
         if(kanjiList != null) {
             if (kanjiList.size() > 0) {
-                Kanji currentKanji = kanjiList.get(index);
+                currentKanji = kanjiList.get(kanjiArray[currentIndex]);
+
+                //Toast.makeText(MainActivity.this, "idx: " + kanjiList.get(kanjiArray[currentIndex]).getKanji() + " " + currentKanji.getKanji(), Toast.LENGTH_SHORT).show();
 
                 lbl_kanji.setText(currentKanji.getKanji());
                 lbl_furigana.setText(currentKanji.getFurigana());
                 lbl_meaning.setText(currentKanji.getMeaning());
                 lbl_difficulty.setText(currentKanji.getDifficulty() + "/9");
-                hideAnswer();
             }
             else {
                 lbl_kanji.setText("");
@@ -377,6 +386,7 @@ public class MainActivity extends AppCompatActivity {
         btn_no.setEnabled(true);
         btn_yes.setEnabled(true);
         tbx_input.setEnabled(false);
+        checkInputBoxValue();
         revealed = true;
     }
 
@@ -385,6 +395,7 @@ public class MainActivity extends AppCompatActivity {
         lbl_kanji.setVisibility((showKanji) ? View.VISIBLE : View.INVISIBLE);
         lbl_meaning.setVisibility((showMeaning) ? View.VISIBLE : View.INVISIBLE);
         lbl_difficulty.setVisibility((showDifficulty) ? View.VISIBLE : View.INVISIBLE);
+        tbx_input.setText("");
         btn_no.setEnabled(false);
         btn_yes.setEnabled(false);
         tbx_input.setEnabled(true);
@@ -398,25 +409,47 @@ public class MainActivity extends AppCompatActivity {
         lbl_paused.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
         swipeMode = (mode == 1);
         btn_reveal.setVisibility(mode == 2 ? View.VISIBLE : View.GONE);
-
-
-        if(mode == 0) {
-            Toast.makeText(MainActivity.this, getString(R.string.modeTimed), Toast.LENGTH_SHORT).show();
-        }
-        else if(mode == 1) {
-            Toast.makeText(MainActivity.this, getString(R.string.modeSwipe), Toast.LENGTH_SHORT).show();
-        }
-        else if(mode == 2) {
-            Toast.makeText(MainActivity.this, getString(R.string.modeButton), Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void setInputMode(SharedPreferences settings) {
         long mode = settings.getLong("inputMode", 0L);
         tbx_input.setVisibility((mode == 0) ? View.VISIBLE : View.GONE);
+        inputMode = (mode == 0);
+        inputModeType = settings.getLong("inputModeType", 0L);
         con_yesNoButtons.setVisibility((mode == 1) ? View.VISIBLE : View.GONE);
     }
 
+    private boolean checkInputBox() {
+        String check = "";
+        if(inputModeType == 0) { // Furigana
+            check = kanjiList.get(kanjiArray[currentIndex]).getFurigana();
+        }
+        else if(inputModeType == 1) { // Kanji
+            check = kanjiList.get(kanjiArray[currentIndex]).getKanji();
+        }
+        else if(inputModeType == 2) { // meaning
+            check = kanjiList.get(kanjiArray[currentIndex]).getMeaning().toLowerCase();
+            return (tbx_input.getText().toString().toLowerCase().equals(check));
+        }
+        return (tbx_input.getText().toString().equals(check));
+    }
+
+    private void checkInputBoxValue() {
+        if(inputMode) {
+            if(checkInputBox()) {
+                Toast.makeText(MainActivity.this, getString(R.string.correct), Toast.LENGTH_SHORT).show();
+                kanjiList.get(currentIndex).changeDifficulty(-1);
+                lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
+                changeDifficultyInDatabase(kanjiList.get(currentIndex));
+            }
+            else {
+                Toast.makeText(MainActivity.this, getString(R.string.wrong), Toast.LENGTH_SHORT).show();
+                kanjiList.get(currentIndex).changeDifficulty(1);
+                lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
+                changeDifficultyInDatabase(kanjiList.get(currentIndex));
+            }
+        }
+    }
 
     private void createTimer(SharedPreferences settings, final ProgressBar bar_timer) {
         timerMaxReveal = settings.getInt("secondsToReveal", 7);
@@ -448,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
                         timerIndex = 0;
                         hideAnswer();
                         currentIndex = (currentIndex + 1) % kanjiList.size();
-                        getKanji(currentIndex);
+                        fillLabelsWithKanji();
                     }
                 }
                 timerHandler.postDelayed(this, 1000);
@@ -493,8 +526,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    static void FisherYatesShuffleArray(int[] array)
-    {
+    static void FisherYatesShuffleArray(int[] array) {
         int n = array.length;
         for (int i = 0; i < array.length; i++) {
             int random = i + (int) (Math.random() * (n - i));

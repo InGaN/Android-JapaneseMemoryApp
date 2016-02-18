@@ -10,6 +10,11 @@
         <item>@string/inputMode2Button</item>
         <item>@string/inputModeNone</item>
     </string-array>
+    <string-array name="inputModeTypes">
+        <item>@string/furigana</item>
+        <item>@string/kanji</item>
+        <item>@string/meaning</item>
+    </string-array>
     <string-array name="selectableThemes">
         <item>@string/themeLight</item>
         <item>@string/themeDark</item>

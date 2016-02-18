@@ -38,11 +38,13 @@
 
     <Button
         android:id="@+id/btn_addNewKanji"
+        android:text="@string/addNew"
         android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <Button
         android:id="@+id/btn_editKanji"
+        android:text="@string/edit"
         android:visibility="gone"
         android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
