@@ -75,5 +75,7 @@
     <string name="inputFillInAllPlease">Please fill in all input areas</string>
     <string name="inputUpdateWrong">Unable to update kanji</string>
     <string name="inputUpdateSuccess">Kanji has been updated</string>
+    <string name="inputKanjiExists">This Kanji already exists: </string>
+    <string name="inputAddAnyway"> Do you want to add anyway?</string>
 
 </resources>

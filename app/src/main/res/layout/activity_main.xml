@@ -60,12 +60,13 @@
          android:id="@+id/tbx_input"
          android:singleLine="true"
          android:textAlignment="center"
+         android:layout_marginTop="5dp"
          android:layout_below="@id/lbl_difficulty"
          android:layout_width="fill_parent"
          android:layout_height="wrap_content" />
     <RelativeLayout
         android:id="@+id/con_yesNoButtons"
-        android:layout_below="@id/lbl_difficulty"
+        android:layout_below="@id/tbx_input"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -86,7 +87,7 @@
     <Button
         android:id="@+id/btn_reveal"
         android:text="@string/reveal"
-        android:layout_below="@id/lbl_difficulty"
+        android:layout_below="@id/tbx_input"
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
