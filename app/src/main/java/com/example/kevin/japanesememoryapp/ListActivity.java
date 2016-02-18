@@ -33,7 +33,7 @@ public class ListActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_list);
 
-        fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID));
+        //fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID));
     }
 
     private void applyTheme(SharedPreferences settings) {
@@ -75,6 +75,9 @@ public class ListActivity extends AppCompatActivity {
             case R.id.action_sortDifficulty:
                 sortDifficulty = !sortDifficulty;
                 fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY , sortDifficulty));
+                return true;
+            case R.id.action_clearDatabase:
+                clearDatabase();
                 return true;
             case R.id.action_sortID:
                 sortID = !sortID;
@@ -179,6 +182,31 @@ public class ListActivity extends AppCompatActivity {
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
         builder.setMessage(getString(R.string.mainAreYouSure) + " ID: " + kanji.get(key).getKanjiID() + " " + kanji.get(key).getKanji() + "?").setPositiveButton(getString(R.string.delete), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
+    }
+
+    private void clearDatabase() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        dbHelper = new FeedReaderDbHelper(ListActivity.this);
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+                        db.execSQL(FeedReaderContract.SQL_DELETE_ENTRIES);
+                        db.execSQL(FeedReaderContract.SQL_CREATE_ENTRIES);
+
+                        finish();
+                        startActivity(getIntent());
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //Do nothing, close dialog
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
+        builder.setMessage(getString(R.string.areYouSureClear)).setPositiveButton(getString(R.string.yes), dialogClickListener).setNegativeButton(getString(R.string.no), dialogClickListener).show();
     }
 
     private ArrayList<Kanji> getKanjiFromDatabase(String sortType, boolean asc) {

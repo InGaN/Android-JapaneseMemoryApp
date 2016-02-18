@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Handler;
+import android.provider.ContactsContract;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -139,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
                     showAnswer();
                 }
             }
-
             public void onSwipeRight() {
                 if(swipeMode) {
                     if(revealed) {
@@ -151,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-
             public void onSwipeLeft() {
                 if(swipeMode) {
                     if(revealed) {
@@ -163,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-
             public void onSwipeBottom() {
                 if(swipeMode) {
                     showAnswer();
@@ -299,6 +297,13 @@ public class MainActivity extends AppCompatActivity {
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
+        Cursor c = db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name='" + FeedReaderContract.FeedEntry.TABLE_NAME +"'", null);
+        if(c!=null) {
+            if(c.getCount() <= 0) {
+                db.execSQL(FeedReaderContract.SQL_CREATE_ENTRIES);
+            }
+            c.close();
+        }
         String[] selectQuery = {
                 FeedReaderContract.FeedEntry.COLUMN_NAME_ID,
                 FeedReaderContract.FeedEntry.COLUMN_NAME_KANJI,

@@ -25,6 +25,7 @@
     <string name="action_input">Add new Kanji</string>
     <string name="action_sortDifficulty">Sort on Difficulty</string>
     <string name="action_sortID">Sort on ID</string>
+    <string name="action_clearDatabase">Clear Database</string>
 
     <string name="title_activity_input">InputActivity</string>
     <string name="title_activity_list">ListActivity</string>
@@ -34,6 +35,7 @@
     <string name="mainWelcomeMessage">Welcome, please start by adding your first Kanji</string>
     <string name="mainEmptyListMessage">Your list is empty, please start by adding your first Kanji</string>
     <string name="mainAreYouSure">Are you sure you want to delete: </string>
+    <string name="areYouSureClear">Do you want to delete all your Kanji? this cannot be undone</string>
 
     <string name="modeTimed">Timer mode active</string>
     <string name="modeSwipe">Swipe mode active</string>

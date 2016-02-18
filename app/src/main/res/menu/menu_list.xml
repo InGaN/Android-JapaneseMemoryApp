@@ -13,8 +13,13 @@
         android:orderInCategory="2"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_clearDatabase"
+        android:title="@string/action_clearDatabase"
+        android:orderInCategory="3"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_input"
         android:title="@string/action_input"
-        android:orderInCategory="3"
+        android:orderInCategory="4"
         app:showAsAction="never" />
 </menu>
