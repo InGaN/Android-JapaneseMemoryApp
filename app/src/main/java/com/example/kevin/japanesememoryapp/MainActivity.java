@@ -83,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
         lbl_errors.setVisibility(View.GONE);
         con_menuButtons = (RelativeLayout)findViewById(R.id.con_menuButtons);
         bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
-        //bar_timer.setProgressDrawable(getDrawable(R.drawable.bar_green));
         tbx_input = (EditText)findViewById(R.id.tbx_input);
         tbx_input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

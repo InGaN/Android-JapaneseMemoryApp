@@ -21,19 +21,10 @@ import android.widget.Switch;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.util.concurrent.Callable;
+
 public class SettingsActivity extends AppCompatActivity {
     public static final String PREFERENCES_FILE_NAME = "MyPreferences";
-    Switch swc_furigana;
-    Switch swc_kanji;
-    Switch swc_meaning;
-    Switch swc_difficulty;
-    Switch swc_showMenuButtons;
-    Spinner spn_questionMode;
-    Spinner spn_inputMode;
-    Spinner spn_themes;
-    Spinner spn_inputModeType;
-    EditText tbx_secondsReveal;
-    EditText tbx_secondsNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,8 +88,8 @@ public class SettingsActivity extends AppCompatActivity {
         setSwitches(settings);
     }
 
-    private void setSpinners(SharedPreferences settings) {
-        spn_questionMode = (Spinner)findViewById(R.id.spn_questionMode);
+    private void setSpinners(final SharedPreferences settings) {
+        Spinner spn_questionMode = (Spinner)findViewById(R.id.spn_questionMode);
         ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this, R.array.questionModes, android.R.layout.simple_spinner_item);
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_questionMode.setAdapter(adapter1);
@@ -107,18 +98,19 @@ public class SettingsActivity extends AppCompatActivity {
         spn_questionMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                spinnerChanged((int) id, "questionMode", settings, new VisibleTimerOptions(), (id == 0));
+                /*SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("questionMode", id);
                 editor.commit();
-                visibleTimerOptions(id == 0);
+                visibleTimerOptions(id == 0); */
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
 
-        spn_themes = (Spinner)findViewById(R.id.spn_themeSets);
+        Spinner spn_themes = (Spinner)findViewById(R.id.spn_themeSets);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.selectableThemes, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_themes.setAdapter(adapter);
@@ -127,10 +119,11 @@ public class SettingsActivity extends AppCompatActivity {
         spn_themes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                spinnerChanged((int) id, "themeSelection", settings, null, false);
+                /*SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("themeSelection", id);
-                editor.commit();
+                editor.commit();*/
             }
 
             @Override
@@ -138,7 +131,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        spn_inputMode = (Spinner)findViewById(R.id.spn_inputMode);
+        Spinner spn_inputMode = (Spinner)findViewById(R.id.spn_inputMode);
         ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.inputModes, android.R.layout.simple_spinner_item);
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_inputMode.setAdapter(adapter2);
@@ -147,11 +140,7 @@ public class SettingsActivity extends AppCompatActivity {
         spn_inputMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putLong("inputMode", id);
-                editor.commit();
-                visibleInputTypeOptions(id == 0);
+                spinnerChanged((int) id, "inputMode", settings, new VisibleInputTypeOptions(), (id == 0));
             }
 
             @Override
@@ -159,7 +148,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        spn_inputModeType = (Spinner)findViewById(R.id.spn_inputModeType);
+        Spinner spn_inputModeType = (Spinner)findViewById(R.id.spn_inputModeType);
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this, R.array.inputModeTypes, android.R.layout.simple_spinner_item);
         adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_inputModeType.setAdapter(adapter3);
@@ -168,16 +157,47 @@ public class SettingsActivity extends AppCompatActivity {
         spn_inputModeType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+                spinnerChanged((int) id, "inputModeType", settings, null, false);
+                /*SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("inputModeType", id);
-                editor.commit();
+                editor.commit();*/
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+    }
+
+    private void spinnerChanged(int input, String preference, SharedPreferences settings, SetVisibles visibles, boolean visibility) {
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(preference, input);
+        editor.commit();
+        if(visibles != null)
+            visibles.execute(visibility);
+    }
+
+    private interface SetVisibles {
+        public void execute(boolean setting);
+    }
+
+    private class VisibleTimerOptions implements SetVisibles {
+        @Override
+        public void execute(boolean setting) {
+            TableRow row1 = (TableRow)findViewById(R.id.row_questionModeTimeReveal);
+            TableRow row2 = (TableRow)findViewById(R.id.row_questionModeTimeNext);
+            row1.setVisibility( (setting) ? View.VISIBLE : View.GONE );
+            row2.setVisibility( (setting) ? View.VISIBLE : View.GONE );
+        }
+    }
+
+    private class VisibleInputTypeOptions implements SetVisibles {
+        @Override
+        public void execute(boolean setting) {
+            TableRow row = (TableRow)findViewById(R.id.row_inputModeTypeOptions);
+            row.setVisibility((setting) ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override
@@ -191,9 +211,16 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setEditTexts(SharedPreferences settings) {
-        tbx_secondsReveal = (EditText)findViewById(R.id.tbx_timerReveal);
-        tbx_secondsReveal.setText(String.valueOf(settings.getInt("secondsToReveal", 1)));
-        tbx_secondsReveal.addTextChangedListener(new TextWatcher() {
+        EditText tbx_secondsReveal = (EditText)findViewById(R.id.tbx_timerReveal);
+        initializeEditText(tbx_secondsReveal, "secondsToReveal", settings, 6);
+
+        EditText tbx_secondsNext = (EditText)findViewById(R.id.tbx_timerNext);
+        initializeEditText(tbx_secondsNext, "secondsToNext", settings, 3);
+    }
+
+    private void initializeEditText(EditText box, final String preference, SharedPreferences settings, int defaultValue) {
+        box.setText(String.valueOf(settings.getInt(preference, defaultValue)));
+        box.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -204,108 +231,51 @@ public class SettingsActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(!s.toString().equals("")) {
-                    if(Integer.parseInt(s.toString()) > 0) {
-                        SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putInt("secondsToReveal", Integer.parseInt(s.toString()));
-                        editor.commit();
-                    }
-                    else {
-                        MainActivity.showAlert(SettingsActivity.this, getString(R.string.error), getString(R.string.settingsNoZero));
-                    }
+                if (!s.toString().equals("")) {
+                    editTextChanged(Integer.parseInt(s.toString()), preference);
                 }
             }
         });
-
-        tbx_secondsNext = (EditText)findViewById(R.id.tbx_timerNext);
-        tbx_secondsNext.setText(String.valueOf(settings.getInt("secondsToNext", 1)));
-        tbx_secondsNext.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(!s.toString().equals("")) {
-                    if(Integer.parseInt(s.toString()) > 0) {
-                        SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putInt("secondsToNext", Integer.parseInt(s.toString()));
-                        editor.commit();
-                    }
-                    else {
-                        MainActivity.showAlert(SettingsActivity.this, getString(R.string.error), getString(R.string.settingsNoZero));
-                    }
-                }
-            }
-        });
-
     }
 
-    private void setSwitches(SharedPreferences settings) {
-        final SharedPreferences.Editor editor = settings.edit();
-
-        swc_furigana = (Switch)findViewById(R.id.swc_furigana);
-        swc_furigana.setChecked(settings.getBoolean("furiganaActive", true));
-        swc_furigana.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                editor.putBoolean("furiganaActive", isChecked);
-                editor.commit();
-            }
-        });
-
-        swc_kanji = (Switch)findViewById(R.id.swc_kanji);
-        swc_kanji.setChecked(settings.getBoolean("kanjiActive", true));
-        swc_kanji.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                editor.putBoolean("kanjiActive", isChecked);
-                editor.commit();
-            }
-        });
-
-        swc_meaning = (Switch)findViewById(R.id.swc_meaning);
-        swc_meaning.setChecked(settings.getBoolean("meaningActive", true));
-        swc_meaning.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                editor.putBoolean("meaningActive", isChecked);
-                editor.commit();
-            }
-        });
-
-        swc_difficulty = (Switch)findViewById(R.id.swc_difficulty);
-        swc_difficulty.setChecked(settings.getBoolean("difficultyActive", true));
-        swc_difficulty.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                editor.putBoolean("difficultyActive", isChecked);
-                editor.commit();
-            }
-        });
-
-        swc_showMenuButtons = (Switch)findViewById(R.id.swc_showMenuButtons);
-        swc_showMenuButtons.setChecked(settings.getBoolean("showMenuButtons", true));
-        swc_showMenuButtons.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                editor.putBoolean("showMenuButtons", isChecked);
-                editor.commit();
-            }
-        });
+    private void editTextChanged(int input, String preference) {
+        if(input > 0) {
+            SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putInt(preference, input);
+            editor.commit();
+        }
+        else {
+            MainActivity.showAlert(SettingsActivity.this, getString(R.string.error), getString(R.string.settingsNoZero));
+        }
     }
 
-    private void visibleTimerOptions(boolean setting) {
-        TableRow row1 = (TableRow)findViewById(R.id.row_questionModeTimeReveal);
-        TableRow row2 = (TableRow)findViewById(R.id.row_questionModeTimeNext);
-        row1.setVisibility( (setting) ? View.VISIBLE : View.GONE );
-        row2.setVisibility( (setting) ? View.VISIBLE : View.GONE );
+    private void setSwitches(final SharedPreferences settings) {
+        Switch swc_furigana = (Switch)findViewById(R.id.swc_furigana);
+        initializeSwitch(swc_furigana, "furiganaActive", settings);
+
+        Switch swc_kanji = (Switch)findViewById(R.id.swc_kanji);
+        initializeSwitch(swc_kanji, "kanjiActive", settings);
+
+        Switch swc_meaning = (Switch)findViewById(R.id.swc_meaning);
+        initializeSwitch(swc_meaning, "meaningActive", settings);
+
+        Switch swc_difficulty = (Switch)findViewById(R.id.swc_difficulty);
+        initializeSwitch(swc_difficulty, "difficultyActive", settings);
+
+        Switch swc_showMenuButtons = (Switch)findViewById(R.id.swc_showMenuButtons);
+        initializeSwitch(swc_showMenuButtons, "showMenuButtons", settings);
     }
 
-    private void visibleInputTypeOptions(boolean setting) {
-        TableRow row = (TableRow)findViewById(R.id.row_inputModeTypeOptions);
-        row.setVisibility( (setting) ? View.VISIBLE : View.GONE );
+    private void initializeSwitch(Switch sw, final String preference, final SharedPreferences settings) {
+        sw.setChecked(settings.getBoolean(preference, true));
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean(preference, isChecked);
+                editor.commit();
+            }
+        });
     }
 }
