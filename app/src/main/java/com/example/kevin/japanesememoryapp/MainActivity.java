@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     TextView lbl_meaning;
     TextView lbl_difficulty;
     TextView lbl_paused;
+    TextView lbl_errors;
     RelativeLayout con_menuButtons;
     ProgressBar bar_timer;
     EditText tbx_input;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     boolean revealed = false;
     boolean swipeMode = false;
     boolean inputMode = false;
+    boolean errorActive = false;
     long inputModeType;
 
     Kanji currentKanji;
@@ -77,8 +79,11 @@ public class MainActivity extends AppCompatActivity {
         lbl_meaning = (TextView)findViewById(R.id.lbl_meaning);
         lbl_difficulty = (TextView)findViewById(R.id.lbl_difficulty);
         lbl_paused = (TextView)findViewById(R.id.lbl_paused);
+        lbl_errors = (TextView)findViewById(R.id.lbl_errors);
+        lbl_errors.setVisibility(View.GONE);
         con_menuButtons = (RelativeLayout)findViewById(R.id.con_menuButtons);
         bar_timer = (ProgressBar)findViewById(R.id.bar_timer);
+        //bar_timer.setProgressDrawable(getDrawable(R.drawable.bar_green));
         tbx_input = (EditText)findViewById(R.id.tbx_input);
         tbx_input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -220,14 +225,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
+        errorActive = false;
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
         applyTheme(settings);
+
         super.onResume();
+
         initializeKanji();
-        initializeViews(settings);
-        hideAnswer();
-        setQuestionMode(settings);
-        setInputMode(settings);
+        if(!errorActive) {
+            initializeViews(settings);
+            hideAnswer();
+            setQuestionMode(settings);
+            setInputMode(settings);
+        }
     }
 
     private void initializeViews(SharedPreferences settings) {
@@ -368,19 +378,14 @@ public class MainActivity extends AppCompatActivity {
                 lbl_furigana.setText(currentKanji.getFurigana());
                 lbl_meaning.setText(currentKanji.getMeaning());
                 lbl_difficulty.setText(currentKanji.getDifficulty() + "/9");
+                lbl_paused.setVisibility(View.GONE);
             }
             else {
-                lbl_kanji.setText("");
-                lbl_furigana.setText("");
-                lbl_meaning.setText("Kanji list is empty...");
-                lbl_difficulty.setText("");
+                fatalError(getString(R.string.errorKanjiListEmpty));
             }
         }
         else {
-            lbl_kanji.setText("");
-            lbl_furigana.setText("");
-            lbl_meaning.setText("Unable to load Kanji...");
-            lbl_difficulty.setText("");
+            fatalError(getString(R.string.errorUnableToLoadKanji));
         }
     }
 
@@ -539,5 +544,20 @@ public class MainActivity extends AppCompatActivity {
             array[random] = array[i];
             array[i] = randomElement;
         }
+    }
+
+    private void fatalError(String message) {
+        errorActive = true;
+        lbl_errors.setText(message);
+        lbl_errors.setVisibility(View.VISIBLE);
+        bar_timer.setVisibility(View.GONE);
+        lbl_paused.setVisibility(View.GONE);
+        con_yesNoButtons.setVisibility(View.GONE);
+        btn_reveal.setVisibility(View.GONE);
+        tbx_input.setVisibility(View.GONE);
+        lbl_furigana.setVisibility(View.GONE);
+        lbl_kanji.setVisibility(View.GONE);
+        lbl_meaning.setVisibility(View.GONE);
+        lbl_difficulty.setVisibility(View.GONE);
     }
 }

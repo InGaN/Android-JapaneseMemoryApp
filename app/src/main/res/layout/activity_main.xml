@@ -11,6 +11,7 @@
         android:layout_width="fill_parent"
         android:layout_alignParentTop="true"
         android:layout_height="wrap_content"
+        android:progressDrawable="@drawable/bar_green"
         style="@android:style/Widget.ProgressBar.Horizontal" />
     <TextView
         android:id="@+id/lbl_paused"
@@ -117,4 +118,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true" />
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/lbl_errors"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:textSize="17dp"
+        android:visibility="visible"
+        android:text="@string/hello_world"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </RelativeLayout>
