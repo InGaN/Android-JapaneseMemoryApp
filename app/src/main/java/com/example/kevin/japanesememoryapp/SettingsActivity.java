@@ -99,11 +99,6 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 spinnerChanged((int) id, "questionMode", settings, new VisibleTimerOptions(), (id == 0));
-                /*SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putLong("questionMode", id);
-                editor.commit();
-                visibleTimerOptions(id == 0); */
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -120,10 +115,6 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 spinnerChanged((int) id, "themeSelection", settings, null, false);
-                /*SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putLong("themeSelection", id);
-                editor.commit();*/
             }
 
             @Override
@@ -158,10 +149,6 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 spinnerChanged((int) id, "inputModeType", settings, null, false);
-                /*SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putLong("inputModeType", id);
-                editor.commit();*/
             }
 
             @Override

@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Handler;
-import android.provider.ContactsContract;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
-    FeedReaderDbHelper dbHelper;
     ArrayList<Kanji> kanjiList;
     int[] kanjiArray;
     TextView lbl_kanji;
@@ -52,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
     int timerIndex = 0;
     int timerMaxReveal, timerMaxNext;
-    boolean timerRevealing = true;
     boolean timerPaused = true;
     boolean revealed = false;
     boolean swipeMode = false;
@@ -106,9 +102,7 @@ public class MainActivity extends AppCompatActivity {
         btn_no.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                kanjiList.get(currentIndex).changeDifficulty(1);
-                lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
-                changeDifficultyInDatabase(kanjiList.get(currentIndex));
+                alterDifficulty(1, kanjiList.get(currentIndex));
                 btn_no.setEnabled(false);
                 btn_yes.setEnabled(false);
             }
@@ -116,9 +110,7 @@ public class MainActivity extends AppCompatActivity {
         btn_yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                kanjiList.get(currentIndex).changeDifficulty(-1);
-                lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
-                changeDifficultyInDatabase(kanjiList.get(currentIndex));
+                alterDifficulty(-1, kanjiList.get(currentIndex));
                 btn_no.setEnabled(false);
                 btn_yes.setEnabled(false);
             }
@@ -283,9 +275,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         switch(item.getItemId()) {
             case R.id.action_settings:
                 callSettings();
@@ -302,11 +291,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ArrayList<Kanji> getKanjiFromDatabase() {
-        dbHelper = new FeedReaderDbHelper(MainActivity.this);
+        FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(MainActivity.this);
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name='" + FeedReaderContract.FeedEntry.TABLE_NAME +"'", null);
+        Cursor c = db.rawQuery(FeedReaderContract.SQL_TABLE_EXISTS, null);
         if(c!=null) {
             if(c.getCount() <= 0) {
                 db.execSQL(FeedReaderContract.SQL_CREATE_ENTRIES);
@@ -357,15 +346,6 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    private void changeDifficultyInDatabase(Kanji kanji) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, kanji.getDifficulty());
-
-        db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + kanji.getKanjiID(), null);
-    }
-
     private void fillLabelsWithKanji() {
         if(kanjiList != null) {
             if (kanjiList.size() > 0) {
@@ -413,7 +393,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setQuestionMode(SharedPreferences settings) {
         long mode = settings.getLong("questionMode", 0L);
-
         bar_timer.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
         lbl_paused.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
         swipeMode = (mode == 1);
@@ -445,19 +424,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkInputBoxValue() {
         if(inputMode) {
-            if(checkInputBox()) {
-                Toast.makeText(MainActivity.this, getString(R.string.correct), Toast.LENGTH_SHORT).show();
-                kanjiList.get(currentIndex).changeDifficulty(-1);
-                lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
-                changeDifficultyInDatabase(kanjiList.get(currentIndex));
-            }
-            else {
-                Toast.makeText(MainActivity.this, getString(R.string.wrong), Toast.LENGTH_SHORT).show();
-                kanjiList.get(currentIndex).changeDifficulty(1);
-                lbl_difficulty.setText(kanjiList.get(currentIndex).getDifficulty() + "/9");
-                changeDifficultyInDatabase(kanjiList.get(currentIndex));
-            }
+            alterDifficulty((checkInputBox() ? -1 : 1), kanjiList.get(currentIndex));
         }
+    }
+
+    private void alterDifficulty(int modifier, Kanji kanji) {
+        Toast.makeText(MainActivity.this, getString((modifier < 0) ? R.string.correct : R.string.wrong), Toast.LENGTH_SHORT).show();
+        kanji.changeDifficulty(modifier);
+        lbl_difficulty.setText(kanji.getDifficulty() + "/9");
+
+        FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(MainActivity.this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, kanji.getDifficulty());
+
+        db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + kanji.getKanjiID(), null);
     }
 
     private void createTimer(SharedPreferences settings, final ProgressBar bar_timer) {
@@ -473,9 +455,9 @@ public class MainActivity extends AppCompatActivity {
                 bar_timer.setProgress(timerIndex);
                 timerIndex++;
 
-                if (timerRevealing) {
+                if (!revealed) {
                     if (timerIndex > timerMaxReveal + 1) {
-                        timerRevealing = false;
+                        revealed = false;
                         bar_timer.setMax(timerMaxNext);
                         bar_timer.setProgress(0);
                         timerIndex = 0;
@@ -484,13 +466,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     if (timerIndex > timerMaxNext + 1) {
-                        timerRevealing = true;
+                        fillLabelsWithKanji();
+                        revealed = true;
                         bar_timer.setMax(timerMaxReveal);
                         bar_timer.setProgress(0);
                         timerIndex = 0;
                         hideAnswer();
                         currentIndex = (currentIndex + 1) % kanjiList.size();
-                        fillLabelsWithKanji();
                     }
                 }
                 timerHandler.postDelayed(this, 1000);

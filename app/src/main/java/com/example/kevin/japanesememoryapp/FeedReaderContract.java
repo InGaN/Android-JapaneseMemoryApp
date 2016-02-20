@@ -32,4 +32,7 @@ public final class FeedReaderContract {
 
     public static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + FeedEntry.TABLE_NAME;
+
+    public static final String SQL_TABLE_EXISTS =
+            "SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name='" + FeedEntry.TABLE_NAME +"'";
 }
