@@ -1,5 +1,6 @@
 package com.example.kevin.japanesememoryapp;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
@@ -14,17 +15,23 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.concurrent.Callable;
 
 public class SettingsActivity extends AppCompatActivity {
     public static final String PREFERENCES_FILE_NAME = "MyPreferences";
+    public static final int SECONDS_MAX_UNTIL_REVEAL = 30;
+    public static final int SECONDS_MAX_UNTIL_NEXT = 30;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +75,17 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void initializeItems(SharedPreferences settings) {
-        setClickables();
+        setClickables(settings);
         setSpinners(settings);
-        setEditTexts(settings);
         setSwitches(settings);
+
+        TextView lbl_seconds_reveal = (TextView)findViewById(R.id.lbl_secondsReveal);
+        lbl_seconds_reveal.setText(getString(R.string.settingsTimerModeSecondsReveal) + " " + settings.getInt("secondsToReveal", SECONDS_MAX_UNTIL_REVEAL));
+        TextView lbl_seconds_next = (TextView)findViewById(R.id.lbl_secondsNext);
+        lbl_seconds_next.setText(getString(R.string.settingsTimerModeSecondsNext) + " " + settings.getInt("secondsToNext", SECONDS_MAX_UNTIL_NEXT));
     }
 
-    private void setClickables() {
+    private void setClickables(final SharedPreferences settings) {
         TableRow row_setFontSizes = (TableRow)findViewById(R.id.row_setFontSizes);
         row_setFontSizes.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +101,56 @@ public class SettingsActivity extends AppCompatActivity {
                 MainActivity.showAlert(SettingsActivity.this, getString(R.string.aboutTitle), getString(R.string.aboutMessage) + "\r" + getString(R.string.aboutWebsite));
             }
         });
+
+        TableRow row_questionModeTimeReveal = (TableRow)findViewById(R.id.row_questionModeTimeReveal);
+        row_questionModeTimeReveal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openNumericDialog(
+                        (TextView) findViewById(R.id.lbl_secondsReveal),
+                        getString(R.string.settingsTimerModeSecondsReveal),
+                        "secondsToReveal",
+                        settings,
+                        SECONDS_MAX_UNTIL_REVEAL);
+            }
+        });
+        TableRow row_questionModeTimeNext = (TableRow)findViewById(R.id.row_questionModeTimeNext);
+        row_questionModeTimeNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openNumericDialog(
+                        (TextView)findViewById(R.id.lbl_secondsNext),
+                        getString(R.string.settingsTimerModeSecondsNext),
+                        "secondsToNext",
+                        settings,
+                        SECONDS_MAX_UNTIL_NEXT);
+            }
+        });
+    }
+
+    private void openNumericDialog(final TextView label, final String labelText, final String preference, final SharedPreferences settings, final int maximum) {
+        final Dialog dialog = new Dialog(SettingsActivity.this);
+        dialog.setTitle(labelText);
+        dialog.setContentView(R.layout.activity_dialog_number_picker);
+
+        final NumberPicker picker = (NumberPicker)dialog.findViewById(R.id.nmp_picker);
+        picker.setMaxValue(maximum);
+        picker.setMinValue(1);
+        picker.setValue(settings.getInt(preference, maximum));
+
+        Button btn_apply = (Button)dialog.findViewById(R.id.btn_apply);
+        btn_apply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt(preference, picker.getValue());
+                editor.commit();
+                label.setText(labelText + " " + settings.getInt(preference, maximum));
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+
     }
 
     private void editSizes() {
@@ -97,6 +158,8 @@ public class SettingsActivity extends AppCompatActivity {
         intent.putExtra("incoming_size", true);
         startActivity(intent);
     }
+
+
 
     private void setSpinners(final SharedPreferences settings) {
         Spinner spn_questionMode = (Spinner)findViewById(R.id.spn_questionMode);
@@ -205,46 +268,6 @@ public class SettingsActivity extends AppCompatActivity {
             return true;
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    private void setEditTexts(SharedPreferences settings) {
-        EditText tbx_secondsReveal = (EditText)findViewById(R.id.tbx_timerReveal);
-        initializeEditText(tbx_secondsReveal, "secondsToReveal", settings, 6);
-
-        EditText tbx_secondsNext = (EditText)findViewById(R.id.tbx_timerNext);
-        initializeEditText(tbx_secondsNext, "secondsToNext", settings, 3);
-    }
-
-    private void initializeEditText(EditText box, final String preference, SharedPreferences settings, int defaultValue) {
-        box.setText(String.valueOf(settings.getInt(preference, defaultValue)));
-        box.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!s.toString().equals("")) {
-                    editTextChanged(Integer.parseInt(s.toString()), preference);
-                }
-            }
-        });
-    }
-
-    private void editTextChanged(int input, String preference) {
-        if(input > 0) {
-            SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putInt(preference, input);
-            editor.commit();
-        }
-        else {
-            MainActivity.showAlert(SettingsActivity.this, getString(R.string.error), getString(R.string.settingsNoZero));
-        }
     }
 
     private void setSwitches(final SharedPreferences settings) {

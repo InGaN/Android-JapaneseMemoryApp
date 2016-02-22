@@ -89,4 +89,5 @@
     <string name="error">error</string>
     <string name="errorKanjiListEmpty">Kanji list is empty...</string>
     <string name="errorUnableToLoadKanji">Unable to load Kanji...</string>
+    <string name="title_activity_dialog_number_picker">dialogNumberPicker</string>
 </resources>
