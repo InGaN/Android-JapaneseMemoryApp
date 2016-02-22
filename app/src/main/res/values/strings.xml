@@ -60,6 +60,7 @@
     <string name="settingsShowMenuButtons">Show menu buttons</string>
     <string name="settingsSelectTheme">Theme</string>
     <string name="settingInputModeType">Check for:</string>
+    <string name="settingsSetSizes">Set font sizes</string>
 
     <string name="aboutTitle">About</string>
     <string name="aboutMessage">Thank you for using this app</string>

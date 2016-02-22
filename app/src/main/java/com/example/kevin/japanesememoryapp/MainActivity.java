@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
+    private static int SIZE_FURIGANA = 30;
+    private static int SIZE_KANJI = 45;
+    private static int SIZE_MEANING = 20;
+    private static int SIZE_DIFFICULTY = 10;
+
     ArrayList<Kanji> kanjiList;
     int[] kanjiArray;
     TextView lbl_kanji;
@@ -54,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     boolean swipeMode = false;
     boolean inputMode = false;
     boolean errorActive = false;
+    boolean editSizes = false;
     long inputModeType;
 
     Kanji currentKanji;
@@ -166,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
         };
         main.setOnTouchListener(swiperListener);
 
+
+
         createTimer(settings, bar_timer);
 
         lbl_paused.setOnClickListener(new View.OnClickListener() {
@@ -217,18 +227,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         errorActive = false;
+        editSizes = getIntent().getBooleanExtra("incoming_size", false);
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
         applyTheme(settings);
 
         super.onResume();
 
         initializeKanji();
+        lbl_furigana.setTextSize(TypedValue.COMPLEX_UNIT_DIP, settings.getInt("sizeFurigana", SIZE_FURIGANA));
+        lbl_kanji.setTextSize(TypedValue.COMPLEX_UNIT_DIP, settings.getInt("sizeKanji", SIZE_KANJI));
+        lbl_meaning.setTextSize(TypedValue.COMPLEX_UNIT_DIP, settings.getInt("sizeMeaning", SIZE_MEANING));
+        lbl_difficulty.setTextSize(TypedValue.COMPLEX_UNIT_DIP, settings.getInt("sizeDifficulty", SIZE_DIFFICULTY));
+
         if(!errorActive) {
             initializeViews(settings);
             hideAnswer();
             setQuestionMode(settings);
             setInputMode(settings);
         }
+        if(editSizes)
+            initializeSizeSliders(settings);
     }
 
     private void initializeViews(SharedPreferences settings) {
@@ -540,5 +558,54 @@ public class MainActivity extends AppCompatActivity {
         lbl_kanji.setVisibility(View.GONE);
         lbl_meaning.setVisibility(View.GONE);
         lbl_difficulty.setVisibility(View.GONE);
+    }
+
+    private void initializeSizeSliders(final SharedPreferences settings) {
+        RelativeLayout container = (RelativeLayout)findViewById(R.id.con_sizeSliders);
+        container.setVisibility(View.VISIBLE);
+        con_yesNoButtons.setVisibility(View.GONE);
+        con_menuButtons.setVisibility(View.GONE);
+        bar_timer.setVisibility(View.GONE);
+        tbx_input.setVisibility(View.GONE);
+        btn_reveal.setVisibility(View.GONE);
+        lbl_furigana.setVisibility(View.VISIBLE);
+        lbl_kanji.setVisibility(View.VISIBLE);
+        lbl_meaning.setVisibility(View.VISIBLE);
+        lbl_difficulty.setVisibility(View.VISIBLE);
+
+        SeekBar sld_sizeFurigana = (SeekBar)findViewById(R.id.sld_sizeFurigana);
+        SeekBar sld_sizeKanji = (SeekBar)findViewById(R.id.sld_sizeKanji);
+        SeekBar sld_sizeMeaning = (SeekBar)findViewById(R.id.sld_sizeMeaning);
+        SeekBar sld_sizeDifficulty = (SeekBar)findViewById(R.id.sld_sizeDifficulty);
+
+        setSeekBar(sld_sizeFurigana, lbl_furigana, "sizeFurigana", settings);
+        setSeekBar(sld_sizeKanji, lbl_kanji, "sizeKanji", settings);
+        setSeekBar(sld_sizeMeaning, lbl_meaning, "sizeMeaning", settings);
+        setSeekBar(sld_sizeDifficulty, lbl_difficulty, "sizeDifficulty", settings);
+
+        sld_sizeFurigana.setProgress(settings.getInt("sizeFurigana", SIZE_FURIGANA));
+        sld_sizeKanji.setProgress(settings.getInt("sizeKanji", SIZE_KANJI));
+        sld_sizeMeaning.setProgress(settings.getInt("sizeMeaning", SIZE_DIFFICULTY));
+        sld_sizeDifficulty.setProgress(settings.getInt("sizeDifficulty", SIZE_MEANING));
+    }
+
+    private void setSeekBar(SeekBar seekbar, final TextView label, final String preference, final SharedPreferences settings) {
+        seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                label.setTextSize(TypedValue.COMPLEX_UNIT_DIP, progress + 1);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt(preference, seekBar.getProgress() + 1);
+                editor.commit();
+            }
+        });
     }
 }

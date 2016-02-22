@@ -1,130 +1,175 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fillViewport="true"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:id="@+id/con_main"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity">
 
-    <ProgressBar
-        android:id="@+id/bar_timer"
-        android:layout_width="fill_parent"
-        android:layout_alignParentTop="true"
-        android:layout_height="wrap_content"
-        style="@android:style/Widget.ProgressBar.Horizontal" />
-    <TextView
-        android:id="@+id/lbl_paused"
-        android:text="@string/paused"
-        android:gravity="left"
-        android:layout_below="@id/bar_timer"
-        android:textSize="12dp"
-        android:visibility="invisible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <ProgressBar
+            android:id="@+id/bar_timer"
+            android:layout_width="fill_parent"
+            android:layout_alignParentTop="true"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.ProgressBar.Horizontal" />
+        <TextView
+            android:id="@+id/lbl_paused"
+            android:text="@string/paused"
+            android:gravity="left"
+            android:layout_below="@id/bar_timer"
+            android:textSize="14dp"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/lbl_furigana"
-        android:text="@string/hello_world"
-        android:layout_below="@id/bar_timer"
-        android:layout_marginTop="20dp"
-        android:gravity="center"
-        android:textSize="30dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/lbl_kanji"
-        android:gravity="center"
-        android:layout_below="@id/lbl_furigana"
-        android:textSize="45dp"
-        android:text="@string/hello_world"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/lbl_meaning"
-        android:gravity="center"
-        android:layout_below="@id/lbl_kanji"
-        android:textSize="20dp"
-        android:text="@string/hello_world"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:id="@+id/lbl_difficulty"
-        android:gravity="center"
-        android:layout_below="@id/lbl_meaning"
-        android:textSize="10dp"
-        android:text="@string/hello_world"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/lbl_furigana"
+            android:text="@string/hello_world"
+            android:layout_below="@id/bar_timer"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:textSize="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/lbl_kanji"
+            android:gravity="center"
+            android:layout_below="@id/lbl_furigana"
+            android:textSize="45dp"
+            android:text="@string/hello_world"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/lbl_meaning"
+            android:gravity="center"
+            android:layout_below="@id/lbl_kanji"
+            android:textSize="20dp"
+            android:text="@string/hello_world"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/lbl_difficulty"
+            android:gravity="center"
+            android:layout_below="@id/lbl_meaning"
+            android:textSize="10dp"
+            android:text="@string/hello_world"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-     <EditText
-         android:id="@+id/tbx_input"
-         android:singleLine="true"
-         android:textAlignment="center"
-         android:layout_marginTop="5dp"
-         android:layout_below="@id/lbl_difficulty"
-         android:layout_width="fill_parent"
-         android:layout_height="wrap_content" />
-    <RelativeLayout
-        android:id="@+id/con_yesNoButtons"
-        android:layout_below="@id/tbx_input"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-    <Button
-        android:id="@+id/btn_no"
-        android:text="@string/no"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"/>
-    <Button
-        android:id="@+id/btn_yes"
-        android:text="@string/yes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"/>
-    </RelativeLayout>
-
-    <Button
-        android:id="@+id/btn_reveal"
-        android:text="@string/reveal"
-        android:layout_below="@id/tbx_input"
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <RelativeLayout
-        android:id="@+id/con_menuButtons"
-        android:layout_alignParentBottom="true"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+         <EditText
+             android:id="@+id/tbx_input"
+             android:singleLine="true"
+             android:textAlignment="center"
+             android:layout_marginTop="5dp"
+             android:layout_below="@id/lbl_difficulty"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content" />
+        <RelativeLayout
+            android:id="@+id/con_yesNoButtons"
+            android:layout_below="@id/tbx_input"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
         <Button
-            android:id="@+id/btn_toSettings"
-            android:text="@string/action_settings"
+            android:id="@+id/btn_no"
+            android:text="@string/no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"/>
         <Button
-            android:id="@+id/btn_toInput"
-            android:text="@string/action_input"
+            android:id="@+id/btn_yes"
+            android:text="@string/yes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
-        <Button
-            android:id="@+id/btn_toList"
-            android:text="@string/action_kanjilist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true" />
-    </RelativeLayout>
+            android:layout_alignParentRight="true"/>
+        </RelativeLayout>
 
-    <TextView
-        android:id="@+id/lbl_errors"
-        android:gravity="center"
-        android:layout_centerVertical="true"
-        android:textSize="17dp"
-        android:visibility="visible"
-        android:text="@string/hello_world"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btn_reveal"
+            android:text="@string/reveal"
+            android:layout_below="@id/tbx_input"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RelativeLayout
+            android:id="@+id/con_sizeSliders"
+            android:visibility="gone"
+            android:layout_below="@id/lbl_difficulty"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <SeekBar
+                android:id="@+id/sld_sizeFurigana"
+                android:paddingTop="20dp"
+                android:max="70"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+            <SeekBar
+                android:id="@+id/sld_sizeKanji"
+                android:paddingTop="20dp"
+                android:max="90"
+                android:layout_below="@id/sld_sizeFurigana"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+            <SeekBar
+                android:id="@+id/sld_sizeMeaning"
+                android:paddingTop="20dp"
+                android:max="40"
+                android:layout_below="@id/sld_sizeKanji"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+            <SeekBar
+                android:id="@+id/sld_sizeDifficulty"
+                android:paddingTop="20dp"
+                android:max="30"
+                android:layout_below="@id/sld_sizeMeaning"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/con_menuButtons"
+            android:layout_alignParentBottom="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+            <Button
+                android:id="@+id/btn_toSettings"
+                android:text="@string/action_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"/>
+            <Button
+                android:id="@+id/btn_toInput"
+                android:text="@string/action_input"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true" />
+            <Button
+                android:id="@+id/btn_toList"
+                android:text="@string/action_kanjilist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/lbl_errors"
+            android:gravity="center"
+            android:layout_centerVertical="true"
+            android:textSize="17dp"
+            android:visibility="visible"
+            android:text="@string/hello_world"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 </RelativeLayout>
+</ScrollView>
