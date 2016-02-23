@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         btn_no.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                alterDifficulty(1, kanjiList.get(currentIndex));
+                alterDifficulty(1, kanjiList.get(kanjiArray[currentIndex]));
                 btn_no.setEnabled(false);
                 btn_yes.setEnabled(false);
             }
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         btn_yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                alterDifficulty(-1, kanjiList.get(currentIndex));
+                alterDifficulty(-1, kanjiList.get(kanjiArray[currentIndex]));
                 btn_no.setEnabled(false);
                 btn_yes.setEnabled(false);
             }
@@ -226,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
+        currentIndex = 0;
         errorActive = false;
         editSizes = getIntent().getBooleanExtra("incoming_size", false);
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
@@ -442,14 +443,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkInputBoxValue() {
         if(inputMode) {
-            alterDifficulty((checkInputBox() ? -1 : 1), kanjiList.get(currentIndex));
+            alterDifficulty((checkInputBox() ? -1 : 1), kanjiList.get(kanjiArray[currentIndex]));
         }
     }
 
     private void alterDifficulty(int modifier, Kanji kanji) {
         Toast.makeText(MainActivity.this, getString((modifier < 0) ? R.string.correct : R.string.wrong), Toast.LENGTH_SHORT).show();
         kanji.changeDifficulty(modifier);
-        lbl_difficulty.setText(kanji.getDifficulty() + "/9");
 
         FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(MainActivity.this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -458,6 +458,7 @@ public class MainActivity extends AppCompatActivity {
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, kanji.getDifficulty());
 
         db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + kanji.getKanjiID(), null);
+        lbl_difficulty.setText(kanji.getDifficulty() + "/9");
     }
 
     private void createTimer(SharedPreferences settings, final ProgressBar bar_timer) {
