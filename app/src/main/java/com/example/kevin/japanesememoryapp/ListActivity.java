@@ -77,6 +77,9 @@ public class ListActivity extends AppCompatActivity {
                 sortID = !sortID;
                 fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID));
                 return true;
+            case R.id.action_exportDatabase:
+                MainActivity.showAlert(ListActivity.this, getString(R.string.action_exportDatabase), getString(dbHelper.exportDatabase() ? R.string.db_export_good : R.string.db_export_fail));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

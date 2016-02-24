@@ -18,8 +18,15 @@
         android:orderInCategory="3"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_input"
-        android:title="@string/action_input"
+        android:id="@+id/action_exportDatabase"
+        android:title="@string/action_exportDatabase"
         android:orderInCategory="4"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_input"
+        android:title="@string/action_input"
+        android:orderInCategory="5"
+        app:showAsAction="never" />
+
+
 </menu>

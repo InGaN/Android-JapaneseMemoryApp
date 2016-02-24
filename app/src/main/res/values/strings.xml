@@ -25,6 +25,9 @@
     <string name="action_sortDifficulty">Sort on Difficulty</string>
     <string name="action_sortID">Sort on ID</string>
     <string name="action_clearDatabase">Clear Database</string>
+    <string name="action_exportDatabase">Export Database</string>
+    <string name="db_export_good">Database exported successfully</string>
+    <string name="db_export_fail">Database exported failed</string>
 
     <string name="title_activity_input">InputActivity</string>
     <string name="title_activity_list">ListActivity</string>
