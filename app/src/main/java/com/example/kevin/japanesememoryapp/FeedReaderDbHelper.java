@@ -1,14 +1,19 @@
 package com.example.kevin.japanesememoryapp;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
 /**
@@ -17,7 +22,7 @@ import java.nio.channels.FileChannel;
 public class FeedReaderDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "Kanji.db";
-    public static final String DATABASE_EXPORT_NAME = "exportKanji";
+    public static final String DATABASE_PATH = "/data/data/"+ "com.example.kevin.japanesememoryapp" +"/databases/";
 
     public FeedReaderDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -35,13 +40,18 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
     }
 
     public boolean exportDatabase() {
-        boolean success = false;
         File sd = Environment.getExternalStorageDirectory();
         File data = Environment.getDataDirectory();
         FileChannel source = null;
         FileChannel destination = null;
-        String currentDBPath = "/data/"+ "com.example.kevin.japanesememoryapp" +"/databases/" + DATABASE_NAME;
-        String backupDBPath = DATABASE_NAME;
+        String currentDBPath = DATABASE_PATH + DATABASE_NAME;
+        //// TODO: 2016/02/24 create folder MyKanji
+
+        File folder = new File(Environment.getExternalStorageDirectory() + "/MyKanji");
+        if (!folder.exists())
+            folder.mkdir();
+
+        String backupDBPath = "MyKanji/" + DATABASE_NAME;
         File currentDB = new File(data, currentDBPath);
         File backupDB = new File(sd, backupDBPath);
         try {
@@ -50,11 +60,37 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
             destination.transferFrom(source, 0, source.size());
             source.close();
             destination.close();
-            success = true;
-            //Toast.makeText(this, "DB Exported!", Toast.LENGTH_LONG).show();
+            return true;
         } catch(IOException e) {
             e.printStackTrace();
         }
-        return success;
+        return false;
+    }
+
+    public String importDatabase(File sourceFile) throws IllegalArgumentException {
+        //// TODO: 2016/02/24 check if db is valid
+        try {
+            //// TODO: 2016/02/25 Merge database
+            //SQLiteDatabase db = SQLiteDatabase.openDatabase(file.getPath(), null, SQLiteDatabase.OPEN_READONLY);
+            //Cursor cursor = db.query(true, FeedReaderContract.FeedEntry.TABLE_NAME, null, null, null, null, null, null, null);
+            File destFile = new File(DATABASE_PATH + DATABASE_NAME);
+            InputStream inputStream = new FileInputStream(sourceFile);
+            OutputStream outputStream = new FileOutputStream(destFile);
+
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, len);
+            }
+            outputStream.flush();
+            inputStream.close();
+            outputStream.close();
+            return "OK";
+        }
+        catch(Exception e) {
+            Log.d("TEST", e.toString());
+            e.printStackTrace();
+            return e.toString();
+        }
     }
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">JapaneseMemoryApp</string>
+    <string name="app_name">My Kanji</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="paused">paused</string>
@@ -28,6 +28,7 @@
     <string name="action_exportDatabase">Export Database</string>
     <string name="db_export_good">Database exported successfully</string>
     <string name="db_export_fail">Database exported failed</string>
+    <string name="action_importDatabase">Import Database</string>
 
     <string name="title_activity_input">InputActivity</string>
     <string name="title_activity_list">ListActivity</string>
@@ -66,7 +67,7 @@
     <string name="settingsSetSizes">Set font sizes</string>
 
     <string name="aboutTitle">About</string>
-    <string name="aboutMessage">Thank you for using this app</string>
+    <string name="aboutMessage">Thank you for using the My Kanji app!</string>
     <string name="aboutWebsite">http://www.kevinmatsubara.com</string>
 
     <string name="questionModeTime">Timed</string>

@@ -23,9 +23,14 @@
         android:orderInCategory="4"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_importDatabase"
+        android:title="@string/action_importDatabase"
+        android:orderInCategory="4"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_input"
         android:title="@string/action_input"
-        android:orderInCategory="5"
+        android:orderInCategory="6"
         app:showAsAction="never" />
 
 

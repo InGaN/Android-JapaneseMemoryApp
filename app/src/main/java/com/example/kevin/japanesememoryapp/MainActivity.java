@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         btn_no.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                alterDifficulty(1, kanjiList.get(kanjiArray[currentIndex]));
+                alterDifficulty(1, currentKanji);
                 btn_no.setEnabled(false);
                 btn_yes.setEnabled(false);
             }
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         btn_yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                alterDifficulty(-1, kanjiList.get(kanjiArray[currentIndex]));
+                alterDifficulty(-1, currentKanji);
                 btn_no.setEnabled(false);
                 btn_yes.setEnabled(false);
             }
@@ -173,9 +173,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         main.setOnTouchListener(swiperListener);
-
-
-
         createTimer(settings, bar_timer);
 
         lbl_paused.setOnClickListener(new View.OnClickListener() {
@@ -258,33 +255,6 @@ public class MainActivity extends AppCompatActivity {
         con_menuButtons.setVisibility(settings.getBoolean("showMenuButtons", true) ? View.VISIBLE : View.INVISIBLE);
     }
 
-    private void initializeKanji() {
-        kanjiList = getKanjiFromDatabase();
-        Log.d("array", "array: " + Arrays.toString(kanjiArray));
-        if(kanjiArray.length > 0) {
-            fillLabelsWithKanji();
-        }
-        else {
-            fillLabelsWithKanji();
-
-            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case DialogInterface.BUTTON_POSITIVE:
-                            callInputActivity();
-                            break;
-                        case DialogInterface.BUTTON_NEGATIVE:
-                            //Do nothing, close dialog
-                            break;
-                    }
-                }
-            };
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setMessage(getString(R.string.mainWelcomeMessage)).setPositiveButton(getString(R.string.addNew), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -365,6 +335,33 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    private void initializeKanji() {
+        kanjiList = getKanjiFromDatabase();
+        Log.d("array", "array: " + Arrays.toString(kanjiArray));
+        if(kanjiArray.length > 0) {
+            fillLabelsWithKanji();
+        }
+        else {
+            fillLabelsWithKanji();
+
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            callInputActivity();
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //Do nothing, close dialog
+                            break;
+                    }
+                }
+            };
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage(getString(R.string.mainWelcomeMessage)).setPositiveButton(getString(R.string.addNew), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
+        }
+    }
+
     private void fillLabelsWithKanji() {
         if(kanjiList != null) {
             if (kanjiList.size() > 0) {
@@ -429,13 +426,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean checkInputBox() {
         String check = "";
         if(inputModeType == 0) { // Furigana
-            check = kanjiList.get(kanjiArray[currentIndex]).getFurigana();
+            check = currentKanji.getFurigana();
         }
         else if(inputModeType == 1) { // Kanji
-            check = kanjiList.get(kanjiArray[currentIndex]).getKanji();
+            check = currentKanji.getKanji();
         }
         else if(inputModeType == 2) { // meaning
-            check = kanjiList.get(kanjiArray[currentIndex]).getMeaning().toLowerCase();
+            check = currentKanji.getMeaning().toLowerCase();
             return (tbx_input.getText().toString().toLowerCase().equals(check));
         }
         return (tbx_input.getText().toString().equals(check));
@@ -443,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkInputBoxValue() {
         if(inputMode) {
-            alterDifficulty((checkInputBox() ? -1 : 1), kanjiList.get(kanjiArray[currentIndex]));
+            alterDifficulty((checkInputBox() ? -1 : 1), currentKanji);
         }
     }
 
