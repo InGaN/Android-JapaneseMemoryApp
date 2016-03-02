@@ -1,6 +1,6 @@
-package com.example.kevin.japanesememoryapp;
+package com.myKanji;
 
-import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,12 +15,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.myKanji.R;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -31,6 +31,7 @@ public class ListActivity extends AppCompatActivity {
     ListView kanjiList;
     boolean sortDifficulty;
     boolean sortID;
+    int totalKanji = 0;
     public static final int FILE_SELECT_CODE = 0;
 
     @Override
@@ -86,7 +87,10 @@ public class ListActivity extends AppCompatActivity {
                 fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID));
                 return true;
             case R.id.action_exportDatabase:
-                MainActivity.showAlert(ListActivity.this, getString(R.string.action_exportDatabase), getString(dbHelper.exportDatabase() ? R.string.db_export_good : R.string.db_export_fail));
+                if(totalKanji > 0)
+                    MainActivity.showAlert(ListActivity.this, getString(R.string.action_exportDatabase), dbHelper.exportDatabase() ? totalKanji + " " + getString(R.string.db_export_good) : getString(R.string.db_export_fail));
+                else
+                    MainActivity.showAlert(ListActivity.this, getString(R.string.action_exportDatabase), getString(R.string.db_export_none));
                 return true;
             case R.id.action_importDatabase:
                 importDatabase();
@@ -102,6 +106,7 @@ public class ListActivity extends AppCompatActivity {
 
         if(kanji.size() > 0) {
             CustomListAdapter customListAdapter = new CustomListAdapter(this, kanji);
+            totalKanji = kanji.size();
 
             kanjiList = (ListView) findViewById(R.id.lst_kanjiList);
             kanjiList.setAdapter(customListAdapter);
@@ -261,16 +266,30 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private void importDatabase() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                        intent.setType("*/*");
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-        try {
-            startActivityForResult(Intent.createChooser(intent, "Select a File to Upload"), FILE_SELECT_CODE);
-        }
-        catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(this, "Please install a File Manager.", Toast.LENGTH_SHORT).show();
-        }
+                        try {
+                            startActivityForResult(Intent.createChooser(intent, "Select a File to Upload"), FILE_SELECT_CODE);
+                        }
+                        catch (android.content.ActivityNotFoundException ex) {
+                            //Toast.makeText(this, "Please install a File Manager.", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //Do nothing, close dialog
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
+        builder.setMessage(getString(R.string.areYouSureImport)).setPositiveButton(getString(R.string.continew), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
     }
 
     @Override
@@ -283,7 +302,7 @@ public class ListActivity extends AppCompatActivity {
                     try {
                         Log.d("TEST", "File Path: " + getPath(this, uri).toString());
                         File file = new File(getPath(this, uri));
-                        MainActivity.showAlert(ListActivity.this, "resutl", "Import: " + dbHelper.importDatabase(file));
+                        MainActivity.showAlert(ListActivity.this, "result", "Import: " + dbHelper.importDatabase(file));
                     }
                     catch(URISyntaxException e) {
                         Log.d("TEST", "Error getting URI");

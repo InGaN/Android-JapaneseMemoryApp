@@ -1,4 +1,4 @@
-package com.example.kevin.japanesememoryapp;
+package com.myKanji;
 
 import android.os.Parcel;
 import android.os.Parcelable;

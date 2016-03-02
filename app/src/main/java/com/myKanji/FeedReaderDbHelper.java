@@ -1,8 +1,6 @@
-package com.example.kevin.japanesememoryapp;
+package com.myKanji;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
@@ -22,7 +20,7 @@ import java.nio.channels.FileChannel;
 public class FeedReaderDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "Kanji.db";
-    public static final String DATABASE_PATH = "/data/data/"+ "com.example.kevin.japanesememoryapp" +"/databases/";
+    public static final String DATABASE_PATH = "/data/"+ MainActivity.PACKAGE_NAME +"/databases/";
 
     public FeedReaderDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -45,7 +43,6 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
         FileChannel source = null;
         FileChannel destination = null;
         String currentDBPath = DATABASE_PATH + DATABASE_NAME;
-        //// TODO: 2016/02/24 create folder MyKanji
 
         File folder = new File(Environment.getExternalStorageDirectory() + "/MyKanji");
         if (!folder.exists())
@@ -62,6 +59,7 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
             destination.close();
             return true;
         } catch(IOException e) {
+            Log.d("EXPORT", e.toString());
             e.printStackTrace();
         }
         return false;
@@ -73,7 +71,7 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
             //// TODO: 2016/02/25 Merge database
             //SQLiteDatabase db = SQLiteDatabase.openDatabase(file.getPath(), null, SQLiteDatabase.OPEN_READONLY);
             //Cursor cursor = db.query(true, FeedReaderContract.FeedEntry.TABLE_NAME, null, null, null, null, null, null, null);
-            File destFile = new File(DATABASE_PATH + DATABASE_NAME);
+            File destFile = new File("data" + DATABASE_PATH + DATABASE_NAME);
             InputStream inputStream = new FileInputStream(sourceFile);
             OutputStream outputStream = new FileOutputStream(destFile);
 

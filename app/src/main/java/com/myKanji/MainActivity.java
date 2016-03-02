@@ -1,4 +1,4 @@
-package com.example.kevin.japanesememoryapp;
+package com.myKanji;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private static int SIZE_KANJI = 45;
     private static int SIZE_MEANING = 20;
     private static int SIZE_DIFFICULTY = 10;
+    public static String PACKAGE_NAME;
 
     ArrayList<Kanji> kanjiList;
     int[] kanjiArray;
@@ -74,8 +75,9 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
         applyTheme(settings);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
+
+        PACKAGE_NAME = getApplicationContext().getPackageName();
 
         RelativeLayout main = (RelativeLayout)findViewById(R.id.con_main);
         lbl_furigana = (TextView)findViewById(R.id.lbl_furigana);
@@ -253,6 +255,16 @@ public class MainActivity extends AppCompatActivity {
         showMeaning = settings.getBoolean("meaningActive", true);
         showDifficulty = settings.getBoolean("difficultyActive", true);
         con_menuButtons.setVisibility(settings.getBoolean("showMenuButtons", true) ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(timerHandler != null) {
+            timerHandler.removeCallbacks(timerRunnable);
+            bar_timer.setProgress(0);
+            timerIndex = 0;
+        }
     }
 
     @Override

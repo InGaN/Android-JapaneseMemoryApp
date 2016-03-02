@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.kevin.japanesememoryapp" >
+    package="com.myKanji" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -11,7 +11,7 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat.NoActionBar" >
         <activity
-            android:name=".MainActivity"
+            android:name="com.myKanji.MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:label="@string/app_name" >
             <intent-filter>
@@ -21,19 +21,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".InputActivity"
+            android:name="com.myKanji.InputActivity"
             android:label="@string/title_activity_input" >
         </activity>
         <activity
-            android:name=".ListActivity"
+            android:name="com.myKanji.ListActivity"
             android:label="@string/title_activity_list" >
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.myKanji.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name=".dialogNumberPicker"
+            android:name="com.myKanji.dialogNumberPicker"
             android:label="@string/title_activity_dialog_number_picker" >
         </activity>
     </application>
