@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onResume();
 
-        initializeKanji();
+        initializeKanji(settings);
         lbl_furigana.setTextSize(TypedValue.COMPLEX_UNIT_DIP, settings.getInt("sizeFurigana", SIZE_FURIGANA));
         lbl_kanji.setTextSize(TypedValue.COMPLEX_UNIT_DIP, settings.getInt("sizeKanji", SIZE_KANJI));
         lbl_meaning.setTextSize(TypedValue.COMPLEX_UNIT_DIP, settings.getInt("sizeMeaning", SIZE_MEANING));
@@ -291,9 +291,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private ArrayList<Kanji> getKanjiFromDatabase() {
+    private ArrayList<Kanji> getKanjiFromDatabase(SharedPreferences settings) {
         FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(MainActivity.this);
 
+        ArrayList<String> difficulties = new ArrayList<>();
+        String whereClause = "";
+        if(settings.getBoolean("filter", false)) {
+            for(int x = 1; x <= 9; x++) {
+                if(settings.getBoolean("filter" + x, true)) {
+                    whereClause += (whereClause.length() > 0) ? "OR " : "";
+                    difficulties.add(String.valueOf(x));
+                    whereClause += FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY + " = ? ";
+                }
+            }
+        }
+        Log.d("array", "diff: " + difficulties.toString());
+        Log.d("array", "where: " + whereClause);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         Cursor c = db.rawQuery(FeedReaderContract.SQL_TABLE_EXISTS, null);
@@ -316,8 +329,8 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = db.query(
                 FeedReaderContract.FeedEntry.TABLE_NAME,
                 selectQuery,
-                null,
-                null,
+                (settings.getBoolean("filter", false) ? whereClause : null),
+                (settings.getBoolean("filter", false) ? difficulties.toArray(new String[difficulties.size()]) : null), // difficulties.toArray(new String[difficulties.size()])
                 null,
                 null,
                 sortOrder
@@ -347,9 +360,9 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    private void initializeKanji() {
-        kanjiList = getKanjiFromDatabase();
-        Log.d("array", "array: " + Arrays.toString(kanjiArray));
+    private void initializeKanji(SharedPreferences settings) {
+        kanjiList = getKanjiFromDatabase(settings);
+        Log.d("array", "IDs: " + Arrays.toString(kanjiArray));
         if(kanjiArray.length > 0) {
             fillLabelsWithKanji();
         }

@@ -12,19 +12,20 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
-import com.myKanji.R;
 
 public class SettingsActivity extends AppCompatActivity {
     public static final String PREFERENCES_FILE_NAME = "MyPreferences";
     public static final int SECONDS_MAX_UNTIL_REVEAL = 30;
     public static final int SECONDS_MAX_UNTIL_NEXT = 30;
+    public static final int DEFAULT_DIFFICULTY = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,11 +72,16 @@ public class SettingsActivity extends AppCompatActivity {
         setClickables(settings);
         setSpinners(settings);
         setSwitches(settings);
+        setCheckboxes(settings);
+
+        new VisibleFilters().execute(settings.getBoolean("filter", false));
 
         TextView lbl_seconds_reveal = (TextView)findViewById(R.id.lbl_secondsReveal);
         lbl_seconds_reveal.setText(getString(R.string.settingsTimerModeSecondsReveal) + " " + settings.getInt("secondsToReveal", SECONDS_MAX_UNTIL_REVEAL));
         TextView lbl_seconds_next = (TextView)findViewById(R.id.lbl_secondsNext);
         lbl_seconds_next.setText(getString(R.string.settingsTimerModeSecondsNext) + " " + settings.getInt("secondsToNext", SECONDS_MAX_UNTIL_NEXT));
+        TextView lbl_defaultDifficulty = (TextView)findViewById(R.id.lbl_settingsDefaultDifficulty);
+        lbl_defaultDifficulty.setText(getString(R.string.settingsDefaultDifficulty) + " " + settings.getInt("defaultDifficulty", DEFAULT_DIFFICULTY));
     }
 
     private void setClickables(final SharedPreferences settings) {
@@ -119,6 +125,18 @@ public class SettingsActivity extends AppCompatActivity {
                         SECONDS_MAX_UNTIL_NEXT);
             }
         });
+        TableRow row_defaultDifficulty = (TableRow)findViewById(R.id.row_defaultDifficulty);
+        row_defaultDifficulty.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openNumericDialog(
+                        (TextView)findViewById(R.id.lbl_settingsDefaultDifficulty),
+                        getString(R.string.settingsDefaultDifficulty),
+                        "defaultDifficulty",
+                        settings,
+                        9);
+            }
+        });
     }
 
     private void openNumericDialog(final TextView label, final String labelText, final String preference, final SharedPreferences settings, final int maximum) {
@@ -143,7 +161,6 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
         dialog.show();
-
     }
 
     private void editSizes() {
@@ -151,8 +168,6 @@ public class SettingsActivity extends AppCompatActivity {
         intent.putExtra("incoming_size", true);
         startActivity(intent);
     }
-
-
 
     private void setSpinners(final SharedPreferences settings) {
         Spinner spn_questionMode = (Spinner)findViewById(R.id.spn_questionMode);
@@ -244,6 +259,13 @@ public class SettingsActivity extends AppCompatActivity {
             row2.setVisibility( (setting) ? View.VISIBLE : View.GONE );
         }
     }
+    private class VisibleFilters implements SetVisibles {
+        @Override
+        public void execute(boolean setting) {
+            TableLayout con_filters = (TableLayout)findViewById(R.id.con_filters);
+            con_filters.setVisibility((setting) ? View.VISIBLE : View.GONE);
+        }
+    }
 
     private class VisibleInputTypeOptions implements SetVisibles {
         @Override
@@ -265,24 +287,53 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void setSwitches(final SharedPreferences settings) {
         Switch swc_furigana = (Switch)findViewById(R.id.swc_furigana);
-        initializeSwitch(swc_furigana, "furiganaActive", settings);
+        initializeSwitch(swc_furigana, "furiganaActive", settings, null);
 
         Switch swc_kanji = (Switch)findViewById(R.id.swc_kanji);
-        initializeSwitch(swc_kanji, "kanjiActive", settings);
+        initializeSwitch(swc_kanji, "kanjiActive", settings, null);
 
         Switch swc_meaning = (Switch)findViewById(R.id.swc_meaning);
-        initializeSwitch(swc_meaning, "meaningActive", settings);
+        initializeSwitch(swc_meaning, "meaningActive", settings, null);
 
         Switch swc_difficulty = (Switch)findViewById(R.id.swc_difficulty);
-        initializeSwitch(swc_difficulty, "difficultyActive", settings);
+        initializeSwitch(swc_difficulty, "difficultyActive", settings, null);
 
         Switch swc_showMenuButtons = (Switch)findViewById(R.id.swc_showMenuButtons);
-        initializeSwitch(swc_showMenuButtons, "showMenuButtons", settings);
+        initializeSwitch(swc_showMenuButtons, "showMenuButtons", settings, null);
+
+        Switch swc_filter = (Switch)findViewById(R.id.swc_filter);
+        initializeSwitch(swc_filter, "filter", settings, new VisibleFilters());
     }
 
-    private void initializeSwitch(Switch sw, final String preference, final SharedPreferences settings) {
+    private void initializeSwitch(Switch sw, final String preference, final SharedPreferences settings, final SetVisibles visibles) {
         sw.setChecked(settings.getBoolean(preference, true));
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean(preference, isChecked);
+                editor.commit();
+                if (visibles != null)
+                    visibles.execute(isChecked);
+            }
+        });
+    }
+
+    private void setCheckboxes(final SharedPreferences settings) {
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_1), "filter1", settings);
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_2), "filter2", settings);
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_3), "filter3", settings);
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_4), "filter4", settings);
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_5), "filter5", settings);
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_6), "filter6", settings);
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_7), "filter7", settings);
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_8), "filter8", settings);
+        initializeCheckbox((CheckBox)findViewById(R.id.cbx_9), "filter9", settings);
+    }
+
+    private void initializeCheckbox(CheckBox cbx, final String preference, final SharedPreferences settings) {
+        cbx.setChecked(settings.getBoolean(preference, true));
+        cbx.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 SharedPreferences.Editor editor = settings.edit();

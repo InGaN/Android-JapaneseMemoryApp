@@ -19,8 +19,6 @@ import android.widget.TextView;
 import com.myKanji.R;
 
 public class InputActivity extends AppCompatActivity {
-    public static int DEFAULT_DIFFICULTY = 5;
-
     FeedReaderDbHelper dbHelper;
 
     TextView lbl_addKanji;
@@ -31,6 +29,7 @@ public class InputActivity extends AppCompatActivity {
     Button btn_editKanji;
 
     Kanji currentKanji;
+    private int defaultDifficulty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +37,8 @@ public class InputActivity extends AppCompatActivity {
         applyTheme(settings);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input);
+
+        defaultDifficulty = settings.getInt("defaultDifficulty", SettingsActivity.DEFAULT_DIFFICULTY);
 
         lbl_addKanji = (TextView)findViewById(R.id.lbl_addKanji);
         tbx_furigana = (EditText)findViewById(R.id.tbx_addFurigana);
@@ -133,7 +134,7 @@ public class InputActivity extends AppCompatActivity {
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_FURIGANA, tbx_furigana.getText().toString());
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_KANJI, tbx_kanji.getText().toString());
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_MEANING, tbx_meaning.getText().toString());
-        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, DEFAULT_DIFFICULTY);
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, defaultDifficulty);
 
         long newRowId;
         newRowId = db.insert(

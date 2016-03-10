@@ -68,6 +68,8 @@
     <string name="settingsSelectTheme">Theme</string>
     <string name="settingInputModeType">Check for:</string>
     <string name="settingsSetSizes">Set font sizes</string>
+    <string name="settingsDefaultDifficulty">Default difficulty: </string>
+    <string name="settingsFilter">Filter difficulty levels</string>
 
     <string name="aboutTitle">About</string>
     <string name="aboutMessage">Thank you for using the My Kanji app!</string>
