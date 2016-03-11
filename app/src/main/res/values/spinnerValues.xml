@@ -2,7 +2,6 @@
 <resources>
     <string-array name="questionModes">
         <item>@string/questionModeTime</item>
-        <item>@string/questionModeSwipe</item>
         <item>@string/questionModeButton</item>
     </string-array>
     <string-array name="inputModes">
@@ -19,4 +18,12 @@
         <item>@string/themeLight</item>
         <item>@string/themeDark</item>
     </string-array>
+    <string-array name="sortOrder">
+        <item>@string/sortRandom</item>
+        <item>@string/sortDifficultyASC</item>
+        <item>@string/sortDifficultyDESC</item>
+        <item>@string/sortIdASC</item>
+        <item>@string/sortIdDESC</item>
+    </string-array>
+
 </resources>

@@ -27,6 +27,20 @@ public class SettingsActivity extends AppCompatActivity {
     public static final int SECONDS_MAX_UNTIL_NEXT = 30;
     public static final int DEFAULT_DIFFICULTY = 5;
 
+    public static final int MODE_TIMED = 0;
+    public static final int MODE_BUTTON = 1;
+    public static final int INPUT_TYPE = 0;
+    public static final int INPUT_YESNO = 1;
+    public static final int INPUT_NONE = 2;
+    public static final int INPUT_TYPE_FURIGANA = 0;
+    public static final int INPUT_TYPE_KANJI = 1;
+    public static final int INPUT_TYPE_MEANING = 2;
+    public static final int SORT_RANDOM = 0;
+    public static final int SORT_DIFFICULTY_ASC = 1;
+    public static final int SORT_DIFFICULTY_DESC = 2;
+    public static final int SORT_ID_ASC = 3;
+    public static final int SORT_ID_DESC = 4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
@@ -186,6 +200,22 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        Spinner spn_sortOrder = (Spinner)findViewById(R.id.spn_sortOrder);
+        ArrayAdapter<CharSequence> adapter4 = ArrayAdapter.createFromResource(this, R.array.sortOrder, android.R.layout.simple_spinner_item);
+        adapter4.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_sortOrder.setAdapter(adapter4);
+
+        spn_sortOrder.setSelection((int) settings.getLong("sortOrder", 0L));
+        spn_sortOrder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                spinnerChanged((int) id, "sortOrder", settings, null, false);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
         Spinner spn_themes = (Spinner)findViewById(R.id.spn_themeSets);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.selectableThemes, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -286,6 +316,9 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setSwitches(final SharedPreferences settings) {
+        Switch swc_allowDifficulty = (Switch)findViewById(R.id.swc_changeDifficulty);
+        initializeSwitch(swc_allowDifficulty, "allowDifficultyChange", settings, null);
+
         Switch swc_furigana = (Switch)findViewById(R.id.swc_furigana);
         initializeSwitch(swc_furigana, "furiganaActive", settings, null);
 

@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private static int SIZE_FURIGANA = 30;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     boolean inputMode = false;
     boolean errorActive = false;
     boolean editSizes = false;
+    boolean allowDifficulty = true;
     long inputModeType;
 
     Kanji currentKanji;
@@ -78,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
+
+        allowDifficulty = settings.getBoolean("allowDifficultyChange", true);
 
         RelativeLayout main = (RelativeLayout)findViewById(R.id.con_main);
         lbl_furigana = (TextView)findViewById(R.id.lbl_furigana);
@@ -140,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        OnSwipeTouchListener swiperListener = new OnSwipeTouchListener(MainActivity.this) {
+        /* OnSwipeTouchListener swiperListener = new OnSwipeTouchListener(MainActivity.this) {
             public void onSwipeTop() {
                 if(swipeMode) {
                     showAnswer();
@@ -174,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        main.setOnTouchListener(swiperListener);
+        main.setOnTouchListener(swiperListener); */
         createTimer(settings, bar_timer);
 
         lbl_paused.setOnClickListener(new View.OnClickListener() {
@@ -325,6 +329,23 @@ public class MainActivity extends AppCompatActivity {
         };
 
         String sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " ASC";
+        switch((int)settings.getLong("sortOrder", 0L)) {
+            case SettingsActivity.SORT_RANDOM:
+                sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " ASC";
+                break;
+            case SettingsActivity.SORT_DIFFICULTY_ASC:
+                sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY + " ASC";
+                break;
+            case SettingsActivity.SORT_DIFFICULTY_DESC:
+                sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY + " DESC";
+                break;
+            case SettingsActivity.SORT_ID_ASC:
+                sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " ASC";
+                break;
+            case SettingsActivity.SORT_ID_DESC:
+                sortOrder = FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " DESC";
+                break;
+        }
 
         Cursor cursor = db.query(
                 FeedReaderContract.FeedEntry.TABLE_NAME,
@@ -354,7 +375,8 @@ public class MainActivity extends AppCompatActivity {
             for(int x = 0; x < kanji.size(); x++) {
                 kanjiArray[x] = x;
             }
-            FisherYatesShuffleArray(kanjiArray);
+            if((int)settings.getLong("sortOrder", 0L) == SettingsActivity.SORT_RANDOM)
+                FisherYatesShuffleArray(kanjiArray);
             return kanji;
         }
         return null;
@@ -434,29 +456,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void setQuestionMode(SharedPreferences settings) {
         long mode = settings.getLong("questionMode", 0L);
-        bar_timer.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
-        lbl_paused.setVisibility(mode == 0 ? View.VISIBLE : View.INVISIBLE);
-        swipeMode = (mode == 1);
-        btn_reveal.setVisibility(mode == 2 ? View.VISIBLE : View.GONE);
+        bar_timer.setVisibility(mode == SettingsActivity.MODE_TIMED ? View.VISIBLE : View.INVISIBLE);
+        lbl_paused.setVisibility(mode == SettingsActivity.MODE_TIMED ? View.VISIBLE : View.INVISIBLE);
+        //swipeMode = (mode == 1);
+        btn_reveal.setVisibility(mode == SettingsActivity.MODE_BUTTON ? View.VISIBLE : View.GONE);
     }
 
     private void setInputMode(SharedPreferences settings) {
         long mode = settings.getLong("inputMode", 0L);
-        tbx_input.setVisibility((mode == 0) ? View.VISIBLE : View.GONE);
-        inputMode = (mode == 0);
+        tbx_input.setVisibility((mode == SettingsActivity.INPUT_TYPE) ? View.VISIBLE : View.GONE);
+        inputMode = (mode == SettingsActivity.INPUT_TYPE);
         inputModeType = settings.getLong("inputModeType", 0L);
-        con_yesNoButtons.setVisibility((mode == 1) ? View.VISIBLE : View.GONE);
+        con_yesNoButtons.setVisibility((mode ==SettingsActivity.INPUT_YESNO) ? View.VISIBLE : View.GONE);
     }
 
     private boolean checkInputBox() {
         String check = "";
-        if(inputModeType == 0) { // Furigana
+        if(inputModeType == SettingsActivity.INPUT_TYPE_FURIGANA) {
             check = currentKanji.getFurigana();
         }
-        else if(inputModeType == 1) { // Kanji
+        else if(inputModeType == SettingsActivity.INPUT_TYPE_KANJI) {
             check = currentKanji.getKanji();
         }
-        else if(inputModeType == 2) { // meaning
+        else if(inputModeType == SettingsActivity.INPUT_TYPE_MEANING) {
             check = currentKanji.getMeaning().toLowerCase();
             return (tbx_input.getText().toString().toLowerCase().equals(check));
         }
@@ -470,17 +492,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void alterDifficulty(int modifier, Kanji kanji) {
-        Toast.makeText(MainActivity.this, getString((modifier < 0) ? R.string.correct : R.string.wrong), Toast.LENGTH_SHORT).show();
-        kanji.changeDifficulty(modifier);
+        if(allowDifficulty) {
+            Toast.makeText(MainActivity.this, getString((modifier < 0) ? R.string.correct : R.string.wrong), Toast.LENGTH_SHORT).show();
+            kanji.changeDifficulty(modifier);
 
-        FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(MainActivity.this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+            FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(MainActivity.this);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, kanji.getDifficulty());
+            ContentValues values = new ContentValues();
+            values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY, kanji.getDifficulty());
 
-        db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + kanji.getKanjiID(), null);
-        lbl_difficulty.setText(kanji.getDifficulty() + "/9");
+            db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + kanji.getKanjiID(), null);
+            lbl_difficulty.setText(kanji.getDifficulty() + "/9");
+        }
     }
 
     private void createTimer(SharedPreferences settings, final ProgressBar bar_timer) {

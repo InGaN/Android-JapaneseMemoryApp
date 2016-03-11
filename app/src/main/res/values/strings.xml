@@ -70,6 +70,14 @@
     <string name="settingsSetSizes">Set font sizes</string>
     <string name="settingsDefaultDifficulty">Default difficulty: </string>
     <string name="settingsFilter">Filter difficulty levels</string>
+    <string name="settingsChangeDifficulty">Allow difficulty change</string>
+    <string name="settingSortOn">Sort words on: </string>
+
+    <string name="sortRandom">Random</string>
+    <string name="sortDifficultyASC">Difficulty low > high</string>
+    <string name="sortDifficultyDESC">Difficulty high > low</string>
+    <string name="sortIdASC">ID low > high</string>
+    <string name="sortIdDESC">ID high > low</string>
 
     <string name="aboutTitle">About</string>
     <string name="aboutMessage">Thank you for using the My Kanji app!</string>
