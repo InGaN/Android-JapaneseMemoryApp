@@ -91,12 +91,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         new VisibleFilters().execute(settings.getBoolean("filter", false));
 
-        TextView lbl_seconds_reveal = (TextView)findViewById(R.id.lbl_secondsReveal);
-        lbl_seconds_reveal.setText(getString(R.string.settingsTimerModeSecondsReveal) + " " + settings.getInt("secondsToReveal", SECONDS_MAX_UNTIL_REVEAL));
-        TextView lbl_seconds_next = (TextView)findViewById(R.id.lbl_secondsNext);
-        lbl_seconds_next.setText(getString(R.string.settingsTimerModeSecondsNext) + " " + settings.getInt("secondsToNext", SECONDS_MAX_UNTIL_NEXT));
-        TextView lbl_defaultDifficulty = (TextView)findViewById(R.id.lbl_settingsDefaultDifficulty);
-        lbl_defaultDifficulty.setText(getString(R.string.settingsDefaultDifficulty) + " " + settings.getInt("defaultDifficulty", DEFAULT_DIFFICULTY));
+        TextView lbl_seconds_reveal = (TextView)findViewById(R.id.lbl_secondsRevealValue);
+        lbl_seconds_reveal.setText(settings.getInt("secondsToReveal", SECONDS_MAX_UNTIL_REVEAL) + " ");
+        TextView lbl_seconds_next = (TextView)findViewById(R.id.lbl_secondsNextValue);
+        lbl_seconds_next.setText(settings.getInt("secondsToNext", SECONDS_MAX_UNTIL_NEXT) + " ");
+        TextView lbl_defaultDifficulty = (TextView)findViewById(R.id.lbl_defaultDifficultyValue);
+        lbl_defaultDifficulty.setText(settings.getInt("defaultDifficulty", DEFAULT_DIFFICULTY) + " ");
     }
 
     private void setClickables(final SharedPreferences settings) {
@@ -121,7 +121,7 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openNumericDialog(
-                        (TextView) findViewById(R.id.lbl_secondsReveal),
+                        (TextView) findViewById(R.id.lbl_secondsRevealValue),
                         getString(R.string.settingsTimerModeSecondsReveal),
                         "secondsToReveal",
                         settings,
@@ -133,7 +133,7 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openNumericDialog(
-                        (TextView)findViewById(R.id.lbl_secondsNext),
+                        (TextView)findViewById(R.id.lbl_secondsNextValue),
                         getString(R.string.settingsTimerModeSecondsNext),
                         "secondsToNext",
                         settings,
@@ -145,7 +145,7 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openNumericDialog(
-                        (TextView)findViewById(R.id.lbl_settingsDefaultDifficulty),
+                        (TextView)findViewById(R.id.lbl_defaultDifficultyValue),
                         getString(R.string.settingsDefaultDifficulty),
                         "defaultDifficulty",
                         settings,
@@ -171,7 +171,7 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putInt(preference, picker.getValue());
                 editor.commit();
-                label.setText(labelText + " " + settings.getInt(preference, maximum));
+                label.setText(settings.getInt(preference, maximum) + " ");
                 dialog.dismiss();
             }
         });

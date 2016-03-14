@@ -16,6 +16,7 @@
         android:id="@+id/tbx_addFurigana"
         android:hint="@string/inputHintFurigana"
         android:layout_below="@id/lbl_addKanji"
+        android:maxLength="20"
         android:singleLine="true"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
@@ -23,6 +24,7 @@
     <EditText
         android:id="@+id/tbx_addKanji"
         android:hint="@string/inputHintKanji"
+        android:maxLength="10"
         android:layout_below="@id/tbx_addFurigana"
         android:singleLine="true"
         android:layout_width="fill_parent"
@@ -31,6 +33,7 @@
     <EditText
         android:id="@+id/tbx_addMeaning"
         android:hint="@string/inputHintMeaning"
+        android:maxLength="40"
         android:layout_below="@id/tbx_addKanji"
         android:singleLine="true"
         android:layout_width="fill_parent"

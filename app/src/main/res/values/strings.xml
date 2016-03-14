@@ -28,7 +28,7 @@
     <string name="action_sortID">Sort on ID</string>
     <string name="action_clearDatabase">Clear Database</string>
     <string name="action_exportDatabase">Export Database</string>
-    <string name="db_export_good">Kanji successfully exported</string>
+    <string name="db_export_good">Kanji successfully exported to MyKanji folder</string>
     <string name="db_export_fail">Database export failed</string>
     <string name="db_export_none">Unable to export, the database is empty</string>
     <string name="action_importDatabase">Import Database</string>
@@ -39,7 +39,7 @@
 
     <string name="mainWelcomeTitle">Welcome to </string>
     <string name="mainWelcomeMessage">Welcome, please start by adding your first Kanji</string>
-    <string name="mainEmptyListMessage">Your list is empty, please start by adding your first Kanji</string>
+    <string name="mainEmptyListMessage">Your list is empty, please start by adding your first Kanji or import an existing database</string>
     <string name="mainAreYouSure">Are you sure you want to delete: </string>
     <string name="areYouSureClear">Do you want to delete all your Kanji? This cannot be undone</string>
     <string name="areYouSureImport">If you import a database, you will lose all your current Kanji. This cannot be undone</string>
