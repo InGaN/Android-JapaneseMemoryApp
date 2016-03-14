@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">My Kanji</string>
+    <string name="version">Version: 1.0</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="paused">paused</string>
@@ -80,7 +81,7 @@
     <string name="sortIdDESC">ID high > low</string>
 
     <string name="aboutTitle">About</string>
-    <string name="aboutMessage">Thank you for using the My Kanji app!</string>
+    <string name="aboutMessage">Thank you for using the My Kanji app</string>
     <string name="aboutWebsite">http://www.kevinmatsubara.com</string>
 
     <string name="questionModeTime">Timed</string>

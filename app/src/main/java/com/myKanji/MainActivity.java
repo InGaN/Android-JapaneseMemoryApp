@@ -11,6 +11,9 @@ import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -137,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                     btn_reveal.setText(getString(R.string.next));
                 } else {
                     hideAnswer();
-                    currentIndex = (currentIndex + 1) % kanjiList.size();
+                    incrementIndex();
                     fillLabelsWithKanji();
                     btn_reveal.setText(getString(R.string.reveal));
                 }
@@ -295,6 +298,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void incrementIndex() {
+        currentIndex = (currentIndex + 1);
+        if(currentIndex >= kanjiList.size()) {
+            initializeKanji(getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0));
+            currentIndex = 0;
+        }
+    }
+
     private ArrayList<Kanji> getKanjiFromDatabase(SharedPreferences settings) {
         FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(MainActivity.this);
 
@@ -309,8 +320,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        Log.d("array", "diff: " + difficulties.toString());
-        Log.d("array", "where: " + whereClause);
+        //Log.d("array", "diff: " + difficulties.toString());
+        //Log.d("array", "where: " + whereClause);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         Cursor c = db.rawQuery(FeedReaderContract.SQL_TABLE_EXISTS, null);
@@ -384,13 +395,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeKanji(SharedPreferences settings) {
         kanjiList = getKanjiFromDatabase(settings);
-        Log.d("array", "IDs: " + Arrays.toString(kanjiArray));
-        if(kanjiArray.length > 0) {
-            fillLabelsWithKanji();
-        }
-        else {
-            fillLabelsWithKanji();
-
+        //Log.d("array", "IDs: " + Arrays.toString(kanjiArray));
+        fillLabelsWithKanji();
+        /*if(!(kanjiArray.length > 0)) {
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -406,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
             };
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setMessage(getString(R.string.mainWelcomeMessage)).setPositiveButton(getString(R.string.addNew), dialogClickListener).setNegativeButton(getString(R.string.cancel), dialogClickListener).show();
-        }
+        }*/
     }
 
     private void fillLabelsWithKanji() {
@@ -531,13 +538,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     if (timerIndex > timerMaxNext + 1) {
+                        incrementIndex();
                         fillLabelsWithKanji();
                         revealed = true;
                         bar_timer.setMax(timerMaxReveal);
                         bar_timer.setProgress(0);
                         timerIndex = 0;
                         hideAnswer();
-                        currentIndex = (currentIndex + 1) % kanjiList.size();
                     }
                 }
                 timerHandler.postDelayed(this, 1000);
@@ -546,9 +553,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void showAlert(Context context, String title, String message) {
+        final SpannableString s = new SpannableString(message);
+        Linkify.addLinks(s, Linkify.WEB_URLS);
+
         android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(context).create();
         alertDialog.setTitle(title);
-        alertDialog.setMessage(message);
+        alertDialog.setMessage(s);
         alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -556,6 +566,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         alertDialog.show();
+        TextView textView = (TextView) alertDialog.findViewById(android.R.id.message);
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
     }
 
     private void callInputActivity() {
