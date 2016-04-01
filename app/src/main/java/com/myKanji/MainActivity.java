@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         btn_toInput.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callInputActivity();
+                callInputActivity(false);
             }
         });
         Button btn_toList = (Button)findViewById(R.id.btn_toList);
@@ -284,6 +284,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
+            case R.id.action_search:
+                callInputActivity(true);
+                return true;
             case R.id.action_settings:
                 callSettings();
                 return true;
@@ -291,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
                 callKanjiList();
                 return true;
             case R.id.action_input:
-                callInputActivity();
+                callInputActivity(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -571,11 +574,14 @@ public class MainActivity extends AppCompatActivity {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
     }
 
-    private void callInputActivity() {
+    private void callInputActivity(boolean search) {
         timerPaused = true;
         if(timerHandler != null)
             timerHandler.removeCallbacks(timerRunnable);
         Intent intent = new Intent(this, InputActivity.class);
+        if(search) {
+            intent.putExtra("searching", true);
+        }
         startActivity(intent);
     }
 

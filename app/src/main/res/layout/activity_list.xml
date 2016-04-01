@@ -16,4 +16,13 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 
+    <ProgressBar
+        android:id="@+id/load_progress"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Inverse"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+    </ProgressBar>
+
 </RelativeLayout>

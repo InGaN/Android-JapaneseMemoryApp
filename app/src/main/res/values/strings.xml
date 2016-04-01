@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">My Kanji</string>
-    <string name="version">Version: 1.0</string>
+    <string name="version">Version: 0.2</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="paused">paused</string>
@@ -20,6 +20,7 @@
     <string name="meaning">Meaning</string>
     <string name="correct">correct</string>
     <string name="wrong">wrong</string>
+    <string name="search">Search</string>
 
     <string name="action_settings">Settings</string>
     <string name="action_kanjilist">Kanji list</string>
@@ -103,6 +104,8 @@
     <string name="inputUpdateSuccess">Kanji has been updated</string>
     <string name="inputKanjiExists">This Kanji already exists: </string>
     <string name="inputAddAnyway"> Do you want to add anyway?</string>
+    <string name="inputSearchFailed">No words could be found...</string>
+    <string name="inputAtLeastOne">Fill in at least a furigana, kanji or meaning</string>
 
     <string name="error">error</string>
     <string name="errorKanjiListEmpty">Kanji list is empty...</string>

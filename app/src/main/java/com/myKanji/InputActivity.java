@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,10 +26,9 @@ public class InputActivity extends AppCompatActivity {
     EditText tbx_furigana;
     EditText tbx_kanji;
     EditText tbx_meaning;
-    Button btn_addNewKanji;
-    Button btn_editKanji;
 
     Kanji currentKanji;
+    boolean searchActive;
     private int defaultDifficulty;
 
     @Override
@@ -44,10 +44,10 @@ public class InputActivity extends AppCompatActivity {
         tbx_furigana = (EditText)findViewById(R.id.tbx_addFurigana);
         tbx_kanji = (EditText)findViewById(R.id.tbx_addKanji);
         tbx_meaning = (EditText)findViewById(R.id.tbx_addMeaning);
-        btn_addNewKanji = (Button)findViewById(R.id.btn_addNewKanji);
-        btn_editKanji = (Button)findViewById(R.id.btn_editKanji);
-
         Button btn_addKanji = (Button)findViewById(R.id.btn_addNewKanji);
+        Button btn_editKanji = (Button)findViewById(R.id.btn_editKanji);
+        Button btn_searchKanji = (Button)findViewById(R.id.btn_searchKanji);
+
         btn_addKanji.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,7 +67,7 @@ public class InputActivity extends AppCompatActivity {
                             }
                         };
                         AlertDialog.Builder builder = new AlertDialog.Builder(InputActivity.this);
-                        builder.setMessage(getString(R.string.inputKanjiExists) + tbx_kanji.getText().toString() + getString(R.string.inputAddAnyway)).setPositiveButton(getString(R.string.yes), dialogClickListener).setNegativeButton(getString(R.string.no), dialogClickListener).show();
+                        builder.setMessage(getString(R.string.inputKanjiExists) + " " + tbx_kanji.getText().toString() + "\n\n" + getString(R.string.inputAddAnyway)).setPositiveButton(getString(R.string.yes), dialogClickListener).setNegativeButton(getString(R.string.no), dialogClickListener).show();
                     }
                     else {
                         saveKanji();
@@ -84,9 +84,11 @@ public class InputActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         currentKanji = (Kanji)intent.getParcelableExtra("incoming_kanji");
+        searchActive = intent.getBooleanExtra("searching", false);
 
         if(currentKanji != null) {
             btn_addKanji.setVisibility(View.GONE);
+            btn_searchKanji.setVisibility(View.GONE);
             btn_editKanji.setVisibility(View.VISIBLE);
 
             lbl_addKanji.setText(getString(R.string.inputEditKanji) + " ID:" + currentKanji.getKanjiID());
@@ -98,6 +100,20 @@ public class InputActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     updateKanji(currentKanji.getKanjiID());
+                }
+            });
+        }
+        else if(searchActive) {
+            btn_addKanji.setVisibility(View.GONE);
+            btn_editKanji.setVisibility(View.GONE);
+            btn_searchKanji.setVisibility(View.VISIBLE);
+
+            lbl_addKanji.setText(getString(R.string.search));
+
+            btn_searchKanji.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    callListActivitySearch();
                 }
             });
         }
@@ -213,5 +229,18 @@ public class InputActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void callListActivitySearch() {
+        if(!tbx_furigana.getText().toString().equals("") || !tbx_kanji.getText().toString().equals("") || !tbx_meaning.getText().toString().equals("")) {
+            Intent intent = new Intent(this, ListActivity.class);
+            intent.putExtra("str_furigana", tbx_furigana.getText().toString());
+            intent.putExtra("str_kanji", tbx_kanji.getText().toString());
+            intent.putExtra("str_meaning", tbx_meaning.getText().toString());
+            startActivity(intent);
+        }
+        else {
+            MainActivity.showAlert(InputActivity.this, getString(R.string.error), getString(R.string.inputAtLeastOne));
+        }
     }
 }

@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +26,10 @@ import com.myKanji.R;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ListActivity extends AppCompatActivity {
     FeedReaderDbHelper dbHelper;
@@ -39,8 +44,14 @@ public class ListActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
         applyTheme(settings);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_list);
+
+        Intent intent = getIntent();
+        if(intent.getExtras() != null) {
+            if (!intent.getStringExtra("str_furigana").equals("") || !intent.getStringExtra("str_kanji").equals("") || !intent.getStringExtra("str_meaning").equals("")) {
+                searchKanji(intent.getStringExtra("str_furigana"), intent.getStringExtra("str_kanji"), intent.getStringExtra("str_meaning"));
+            }
+        }
     }
 
     private void applyTheme(SharedPreferences settings) {
@@ -60,7 +71,10 @@ public class ListActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID));
+        Intent intent = getIntent();
+        if(intent.getExtras() == null) {
+            fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID));
+        }
     }
 
     @Override
@@ -72,8 +86,11 @@ public class ListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
+            case R.id.action_searchKanji:
+                callInputActivity(true);
+                return true;
             case R.id.action_input:
-                callInputActivity();
+                callInputActivity(false);
                 return true;
             case R.id.action_sortDifficulty:
                 sortDifficulty = !sortDifficulty;
@@ -146,7 +163,7 @@ public class ListActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                         case DialogInterface.BUTTON_POSITIVE:
-                            callInputActivity();
+                            callInputActivity(false);
                             break;
                         case DialogInterface.BUTTON_NEGATIVE:
                             //Do nothing, close dialog
@@ -165,8 +182,11 @@ public class ListActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void callInputActivity() {
+    private void callInputActivity(boolean search) {
         Intent intent = new Intent(this, InputActivity.class);
+        if(search) {
+            intent.putExtra("searching", true);
+        }
         startActivity(intent);
     }
 
@@ -336,5 +356,65 @@ public class ListActivity extends AppCompatActivity {
         }
 
         return null;
+    }
+
+    private boolean searchKanji(String furigana, String kanji, String meaning) {
+        ProgressBar loader = (ProgressBar) findViewById(R.id.load_progress);
+        loader.setVisibility(View.VISIBLE);
+
+        ArrayList<Kanji> availableKanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID);
+        HashMap<Kanji, Integer> map = new HashMap<>();
+
+        for (int x = 0; x < availableKanji.size(); x++) {
+            Kanji currentKanji = availableKanji.get(x);
+            if (currentKanji.getFurigana().contains(furigana) && !furigana.equals("")) { // messy, reoccurring code
+                if (map.keySet().contains(currentKanji)) {
+                    map.put(currentKanji, map.get(currentKanji) + 1);
+                } else {
+                    map.put(currentKanji, 0);
+                }
+            }
+            if (currentKanji.getKanji().contains(kanji) && !kanji.equals("")) {
+                if (map.keySet().contains(currentKanji)) {
+                    map.put(currentKanji, map.get(currentKanji) + 1);
+                } else {
+                    map.put(currentKanji, 0);
+                }
+            }
+            if (currentKanji.getMeaning().contains(meaning) && !meaning.equals("")) {
+                if (map.keySet().contains(currentKanji)) {
+                    map.put(currentKanji, map.get(currentKanji) + 1);
+                } else {
+                    map.put(currentKanji, 0);
+                }
+            }
+        }
+
+        Log.d("MAP", map.size() + " | " + map.toString());
+
+        ArrayList<Kanji> foundKanji = new ArrayList<>();
+        int maxValue = 0;
+        for (Integer val : map.values()) {
+            if (val > maxValue)
+                maxValue = val;
+        }
+
+        for (int x = maxValue; x >= 0; x--) {
+            for (Map.Entry<Kanji, Integer> entry : map.entrySet()) {
+                if (entry.getValue() == x)
+                    foundKanji.add(entry.getKey());
+            }
+        }
+
+        loader.setVisibility(View.GONE);
+
+        if (foundKanji.size() > 0) {
+            fillListWithKanji(foundKanji);
+            return true;
+        }
+        else {
+            MainActivity.showAlert(ListActivity.this, getString(R.string.error), getString(R.string.inputSearchFailed));
+            return false;
+        }
     }
 }

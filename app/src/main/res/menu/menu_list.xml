@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.myKanji.ListActivity">
     <item
+        android:id="@+id/action_searchKanji"
+        android:title="@string/search"
+        android:orderInCategory="0"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_sortDifficulty"
         android:title="@string/action_sortDifficulty"
         android:orderInCategory="1"
