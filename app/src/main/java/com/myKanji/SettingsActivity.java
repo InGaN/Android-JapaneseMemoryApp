@@ -47,7 +47,7 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
         applyTheme(settings);
         super.onCreate(savedInstanceState);
-
+        setTitle("");
         setContentView(R.layout.activity_settings);
 
         initializeItems(settings);

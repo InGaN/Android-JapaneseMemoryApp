@@ -1,8 +1,8 @@
 <resources>
 
-    <style name="AppThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppThemeLight" parent="Theme.AppCompat.Light.DarkActionBar">
     </style>
-    <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppThemeDark" parent="Theme.AppCompat">
     </style>
 
     <color name="custom_theme_color">#b0b0ff</color>

@@ -24,6 +24,8 @@ import android.widget.Toast;
 import com.myKanji.R;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -44,6 +46,7 @@ public class ListActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
         applyTheme(settings);
         super.onCreate(savedInstanceState);
+        setTitle("");
         setContentView(R.layout.activity_list);
 
         Intent intent = getIntent();
@@ -320,7 +323,7 @@ public class ListActivity extends AppCompatActivity {
                     Uri uri = data.getData();
                     Log.d("TEST", "File Uri: " + uri.toString());
                     try {
-                        Log.d("TEST", "File Path: " + getPath(this, uri).toString());
+                        //Log.d("TEST", "File Path: " + getPath(this, uri).toString());
                         File file = new File(getPath(this, uri));
                         MainActivity.showAlert(ListActivity.this, "result", "Import: " + dbHelper.importDatabase(file));
                     }

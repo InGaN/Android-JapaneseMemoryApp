@@ -36,6 +36,7 @@ public class InputActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(SettingsActivity.PREFERENCES_FILE_NAME, 0);
         applyTheme(settings);
         super.onCreate(savedInstanceState);
+        setTitle("");
         setContentView(R.layout.activity_input);
 
         defaultDifficulty = settings.getInt("defaultDifficulty", SettingsActivity.DEFAULT_DIFFICULTY);
