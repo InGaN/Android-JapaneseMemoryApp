@@ -107,6 +107,9 @@
     <string name="inputSearchFailed">No words could be found...</string>
     <string name="inputAtLeastOne">Fill in at least a furigana, kanji or meaning</string>
 
+    <string name="statsTitle">Statistics</string>
+    <string name="statsWords">words</string>
+
     <string name="error">error</string>
     <string name="errorKanjiListEmpty">Kanji list is empty...</string>
     <string name="errorUnableToLoadKanji">Unable to load Kanji...</string>

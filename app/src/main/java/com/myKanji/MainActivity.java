@@ -300,6 +300,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_search:
                 callInputActivity(true);
                 return true;
+            case R.id.action_showStats:
+                MainActivity.showStats(MainActivity.this, getString(R.string.statsTitle));
+                return true;
             case R.id.action_settings:
                 callSettings();
                 return true;
@@ -585,6 +588,19 @@ public class MainActivity extends AppCompatActivity {
         TextView textView = (TextView) alertDialog.findViewById(android.R.id.message);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+    }
+
+    public static void showStats(Context context, String title) {
+        FeedReaderDbHelper dbHelper = new FeedReaderDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String output = "";
+        for(int x = 1; x <= 9; x++) {
+            Cursor cursor = db.rawQuery("SELECT COUNT(" + FeedReaderContract.FeedEntry.COLUMN_NAME_ID + ") FROM " + FeedReaderContract.FeedEntry.TABLE_NAME + " WHERE " + FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY + "=" + x, null);
+            cursor.moveToFirst();
+            output += x + "/9 = " + cursor.getInt(0) + " words" + "\n";
+        }
+        showAlert(context, title, output);
     }
 
     private void callInputActivity(boolean search) {

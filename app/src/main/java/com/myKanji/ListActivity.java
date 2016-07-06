@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ListActivity extends AppCompatActivity {
@@ -103,6 +104,9 @@ public class ListActivity extends AppCompatActivity {
         switch(item.getItemId()) {
             case R.id.action_searchKanji:
                 callInputActivity(true);
+                return true;
+            case R.id.action_showStats:
+                MainActivity.showStats(ListActivity.this, getString(R.string.statsTitle));
                 return true;
             case R.id.action_input:
                 callInputActivity(false);
