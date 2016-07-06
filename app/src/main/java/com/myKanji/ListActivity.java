@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -36,9 +37,14 @@ import java.util.Map;
 public class ListActivity extends AppCompatActivity {
     FeedReaderDbHelper dbHelper;
     ListView kanjiList;
+    ProgressBar loadProgress;
+    CustomListAdapter customListAdapter;
+    ArrayList<Kanji> kanji = new ArrayList<>();
     boolean sortDifficulty;
     boolean sortID;
     int totalKanji = 0;
+    int loadedKanji = 0;
+    final int loadLimit = 200;
     public static final int FILE_SELECT_CODE = 0;
 
     @Override
@@ -48,6 +54,9 @@ public class ListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setTitle("");
         setContentView(R.layout.activity_list);
+        loadProgress = (ProgressBar) findViewById(R.id.load_progress);
+        kanjiList = (ListView) findViewById(R.id.lst_kanjiList);
+        totalKanji = getTotalKanji();
 
         Intent intent = getIntent();
         if(intent.getExtras() != null) {
@@ -74,9 +83,12 @@ public class ListActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        loadedKanji = 0;
+        totalKanji = getTotalKanji();
         Intent intent = getIntent();
         if(intent.getExtras() == null) {
-            fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID));
+            kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, "0, " + loadLimit);
+            fillListWithKanji();
         }
     }
 
@@ -97,14 +109,16 @@ public class ListActivity extends AppCompatActivity {
                 return true;
             case R.id.action_sortDifficulty:
                 sortDifficulty = !sortDifficulty;
-                fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY , sortDifficulty));
+                kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY , sortDifficulty, null);
+                fillListWithKanji();
                 return true;
             case R.id.action_clearDatabase:
                 clearDatabase();
                 return true;
             case R.id.action_sortID:
                 sortID = !sortID;
-                fillListWithKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID));
+                kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID, null);
+                fillListWithKanji();
                 return true;
             case R.id.action_exportDatabase:
                 if(totalKanji > 0)
@@ -120,15 +134,13 @@ public class ListActivity extends AppCompatActivity {
         }
     }
 
-    private void fillListWithKanji(final ArrayList<Kanji> kanji) {
+    private void fillListWithKanji() {
         TextView lbl_emptyList = (TextView)findViewById(R.id.lbl_emptyList);
         lbl_emptyList.setVisibility((kanji.size() > 0) ? View.GONE : View.VISIBLE);
 
         if(kanji.size() > 0) {
-            CustomListAdapter customListAdapter = new CustomListAdapter(this, kanji);
-            totalKanji = kanji.size();
+            customListAdapter = new CustomListAdapter(this, kanji);
 
-            kanjiList = (ListView) findViewById(R.id.lst_kanjiList);
             kanjiList.setAdapter(customListAdapter);
 
             kanjiList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -157,6 +169,21 @@ public class ListActivity extends AppCompatActivity {
                             .setNegativeButton(getString(R.string.cancel), dialogClickListener)
                             .setNeutralButton(getString(R.string.delete), dialogClickListener).show();
                     return false;
+                }
+            });
+
+            kanjiList.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) { }
+
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    if(firstVisibleItem+visibleItemCount == totalItemCount && totalItemCount!=0) {
+                        if(totalKanji > loadedKanji) {
+                            loadMoreKanji();
+                            //MainActivity.showAlert(ListActivity.this, "TEST", "TEST");
+                        }
+                    }
                 }
             });
         }
@@ -245,7 +272,17 @@ public class ListActivity extends AppCompatActivity {
         builder.setMessage(getString(R.string.areYouSureClear)).setPositiveButton(getString(R.string.yes), dialogClickListener).setNegativeButton(getString(R.string.no), dialogClickListener).show();
     }
 
-    private ArrayList<Kanji> getKanjiFromDatabase(String sortType, boolean asc) {
+    private int getTotalKanji() {
+        dbHelper = new FeedReaderDbHelper(ListActivity.this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT COUNT(" + FeedReaderContract.FeedEntry.COLUMN_NAME_ID + ") FROM " + FeedReaderContract.FeedEntry.TABLE_NAME, null);
+        cursor.moveToFirst();
+        return cursor.getInt(0);
+    }
+
+
+    private ArrayList<Kanji> getKanjiFromDatabase(String sortType, boolean asc, String amount) {
         dbHelper = new FeedReaderDbHelper(ListActivity.this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -266,7 +303,8 @@ public class ListActivity extends AppCompatActivity {
                 null,                                                       // The values for the WHERE clause
                 null,                                                       // don't group the rows
                 null,                                                       // don't filter by row groups
-                sortOrder                                                   // The sort order
+                sortOrder,                                                  // The sort order
+                amount                                                      // Limit, remove argument to select all
         );
 
         if(cursor != null) {
@@ -286,6 +324,20 @@ public class ListActivity extends AppCompatActivity {
             return kanji;
         }
         return null;
+    }
+
+    private void loadMoreKanji() {
+            loadProgress.setVisibility(View.VISIBLE);
+            loadedKanji += loadLimit;
+            appendKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, loadedKanji + ", " + loadLimit));
+            loadProgress.setVisibility(View.GONE);
+    }
+
+    private void appendKanji(final ArrayList<Kanji> newKanji) {
+        for(Kanji word : newKanji) {
+            kanji.add(word);
+        }
+        customListAdapter.notifyDataSetChanged();
     }
 
     private void importDatabase() {
@@ -361,11 +413,11 @@ public class ListActivity extends AppCompatActivity {
         return null;
     }
 
-    private boolean searchKanji(String furigana, String kanji, String meaning) {
+    private boolean searchKanji(String furigana, String word, String meaning) {
         ProgressBar loader = (ProgressBar) findViewById(R.id.load_progress);
         loader.setVisibility(View.VISIBLE);
 
-        ArrayList<Kanji> availableKanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID);
+        ArrayList<Kanji> availableKanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, null);
         HashMap<Kanji, Integer> map = new HashMap<>();
 
         for (int x = 0; x < availableKanji.size(); x++) {
@@ -377,7 +429,7 @@ public class ListActivity extends AppCompatActivity {
                     map.put(currentKanji, 0);
                 }
             }
-            if (currentKanji.getKanji().contains(kanji) && !kanji.equals("")) {
+            if (currentKanji.getKanji().contains(word) && !word.equals("")) {
                 if (map.keySet().contains(currentKanji)) {
                     map.put(currentKanji, map.get(currentKanji) + 1);
                 } else {
@@ -412,7 +464,8 @@ public class ListActivity extends AppCompatActivity {
         loader.setVisibility(View.GONE);
 
         if (foundKanji.size() > 0) {
-            fillListWithKanji(foundKanji);
+            kanji = foundKanji;
+            fillListWithKanji();
             return true;
         }
         else {
