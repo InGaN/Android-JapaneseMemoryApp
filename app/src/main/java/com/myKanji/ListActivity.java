@@ -42,6 +42,7 @@ public class ListActivity extends AppCompatActivity {
     CustomListAdapter customListAdapter;
     ArrayList<Kanji> kanji = new ArrayList<>();
     boolean sortDifficulty;
+    boolean searchActive = false;
     boolean sortID;
     int totalKanji = 0;
     int loadedKanji = 0;
@@ -62,6 +63,7 @@ public class ListActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if(intent.getExtras() != null) {
             if (!intent.getStringExtra("str_furigana").equals("") || !intent.getStringExtra("str_kanji").equals("") || !intent.getStringExtra("str_meaning").equals("")) {
+                searchActive = true;
                 searchKanji(intent.getStringExtra("str_furigana"), intent.getStringExtra("str_kanji"), intent.getStringExtra("str_meaning"));
             }
         }
@@ -88,10 +90,15 @@ public class ListActivity extends AppCompatActivity {
         totalKanji = getTotalKanji();
         Intent intent = getIntent();
         if(intent.getExtras() == null) {
-            kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, "0, " + loadLimit);
+            kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, "0, " + loadLimit, null, null);
             fillListWithKanji();
         }
-    }
+        else {
+            if (!intent.getStringExtra("str_furigana").equals("") || !intent.getStringExtra("str_kanji").equals("") || !intent.getStringExtra("str_meaning").equals("")) {
+                searchActive = true;
+                searchKanji(intent.getStringExtra("str_furigana"), intent.getStringExtra("str_kanji"), intent.getStringExtra("str_meaning"));
+            }
+        }    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -101,6 +108,8 @@ public class ListActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        String[] ids = new String[kanji.size()];
+        String columns = "";
         switch(item.getItemId()) {
             case R.id.action_searchKanji:
                 callInputActivity(true);
@@ -113,7 +122,14 @@ public class ListActivity extends AppCompatActivity {
                 return true;
             case R.id.action_sortDifficulty:
                 sortDifficulty = !sortDifficulty;
-                kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY , sortDifficulty, null);
+                for(int x = 0; x < kanji.size(); x++) {
+                    ids[x] = Integer.toString(kanji.get(x).getKanjiID());
+                    columns = columns + (FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " = ?");
+                    if(x < kanji.size()-1) {
+                        columns = columns + " OR ";
+                    }
+                }
+                kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_DIFFICULTY , sortDifficulty, null, columns, ids);
                 fillListWithKanji();
                 return true;
             case R.id.action_clearDatabase:
@@ -121,7 +137,14 @@ public class ListActivity extends AppCompatActivity {
                 return true;
             case R.id.action_sortID:
                 sortID = !sortID;
-                kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID, null);
+                for(int x = 0; x < kanji.size(); x++) {
+                    ids[x] = Integer.toString(kanji.get(x).getKanjiID());
+                    columns = columns + (FeedReaderContract.FeedEntry.COLUMN_NAME_ID + " = ?");
+                    if(x < kanji.size()-1) {
+                        columns = columns + " OR ";
+                    }
+                }
+                kanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID , sortID, null, columns, ids);
                 fillListWithKanji();
                 return true;
             case R.id.action_exportDatabase:
@@ -176,20 +199,23 @@ public class ListActivity extends AppCompatActivity {
                 }
             });
 
-            kanjiList.setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) { }
+            if(!searchActive) {
+                kanjiList.setOnScrollListener(new AbsListView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(AbsListView view, int scrollState) {
+                    }
 
-                @Override
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                    if(firstVisibleItem+visibleItemCount == totalItemCount && totalItemCount!=0) {
-                        if(totalKanji > loadedKanji) {
-                            loadMoreKanji();
-                            //MainActivity.showAlert(ListActivity.this, "TEST", "TEST");
+                    @Override
+                    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                        if (firstVisibleItem + visibleItemCount == totalItemCount && totalItemCount != 0) {
+                            if (totalKanji > loadedKanji) {
+                                loadMoreKanji();
+                                //MainActivity.showAlert(ListActivity.this, "TEST", "TEST");
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
         else {
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -286,7 +312,7 @@ public class ListActivity extends AppCompatActivity {
     }
 
 
-    private ArrayList<Kanji> getKanjiFromDatabase(String sortType, boolean asc, String amount) {
+    private ArrayList<Kanji> getKanjiFromDatabase(String sortType, boolean asc, String amount, String whereColumn, String[] whereValues) {
         dbHelper = new FeedReaderDbHelper(ListActivity.this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -300,11 +326,12 @@ public class ListActivity extends AppCompatActivity {
 
         String sortOrder = sortType + ((asc) ? " ASC" : " DESC");
 
+
         Cursor cursor = db.query(
                 FeedReaderContract.FeedEntry.TABLE_NAME,                    // The table to query
                 selectQuery,                                                // The columns to return
-                null,                                                       // The columns for the WHERE clause
-                null,                                                       // The values for the WHERE clause
+                whereColumn,                                                // The columns for the WHERE clause
+                whereValues,                                                // The values for the WHERE clause
                 null,                                                       // don't group the rows
                 null,                                                       // don't filter by row groups
                 sortOrder,                                                  // The sort order
@@ -333,7 +360,7 @@ public class ListActivity extends AppCompatActivity {
     private void loadMoreKanji() {
             loadProgress.setVisibility(View.VISIBLE);
             loadedKanji += loadLimit;
-            appendKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, loadedKanji + ", " + loadLimit));
+            appendKanji(getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, loadedKanji + ", " + loadLimit, null, null));
             loadProgress.setVisibility(View.GONE);
     }
 
@@ -421,7 +448,7 @@ public class ListActivity extends AppCompatActivity {
         ProgressBar loader = (ProgressBar) findViewById(R.id.load_progress);
         loader.setVisibility(View.VISIBLE);
 
-        ArrayList<Kanji> availableKanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, null);
+        ArrayList<Kanji> availableKanji = getKanjiFromDatabase(FeedReaderContract.FeedEntry.COLUMN_NAME_ID, sortID, null, null, null);
         HashMap<Kanji, Integer> map = new HashMap<>();
 
         for (int x = 0; x < availableKanji.size(); x++) {

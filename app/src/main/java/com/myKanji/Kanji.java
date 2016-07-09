@@ -1,5 +1,6 @@
 package com.myKanji;
 
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -74,5 +75,12 @@ public class Kanji implements Parcelable {
             difficulty = 9;
         else
             difficulty += modifier;
+    }
+    public static int getColor(int difficulty) {
+        int divider = 225 / 9;
+        int red = difficulty * divider;
+        int green = (10 - difficulty) * divider;
+
+        return Color.rgb(red, green, 0);
     }
 }

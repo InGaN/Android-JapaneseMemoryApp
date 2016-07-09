@@ -337,6 +337,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         Switch swc_filter = (Switch)findViewById(R.id.swc_filter);
         initializeSwitch(swc_filter, "filter", settings, new VisibleFilters());
+
+        Switch swc_colourcode = (Switch)findViewById(R.id.swc_colourcode);
+        initializeSwitch(swc_colourcode, "colourcode", settings, null);
     }
 
     private void initializeSwitch(Switch sw, final String preference, final SharedPreferences settings, final SetVisibles visibles) {

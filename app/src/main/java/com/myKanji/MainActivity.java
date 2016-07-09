@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
     Kanji currentKanji;
 
-    boolean showFurigana, showKanji, showMeaning, showDifficulty;
+    boolean showFurigana, showKanji, showMeaning, showDifficulty, showColourcode;
     int currentIndex = 0;
 
     @Override
@@ -110,6 +110,13 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     return false;
                 }
+            }
+        });
+
+        bar_timer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pauseTimer(!timerPaused, true);
             }
         });
 
@@ -188,9 +195,7 @@ public class MainActivity extends AppCompatActivity {
         lbl_paused.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                timerPaused = !timerPaused;
-                timerHandler.postDelayed(timerRunnable, 1000);
-                Toast.makeText(MainActivity.this, (timerPaused) ? getString(R.string.paused) : getString(R.string.resume), Toast.LENGTH_SHORT).show();
+                pauseTimer(false, true);
             }
         });
 
@@ -215,6 +220,13 @@ public class MainActivity extends AppCompatActivity {
                 callSettings();
             }
         });
+    }
+
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        if(!timerPaused)
+            pauseTimer(true, true);
+        return true;
     }
 
     @Override
@@ -274,7 +286,16 @@ public class MainActivity extends AppCompatActivity {
         showKanji = settings.getBoolean("kanjiActive", true);
         showMeaning = settings.getBoolean("meaningActive", true);
         showDifficulty = settings.getBoolean("difficultyActive", true);
+        showColourcode = settings.getBoolean("colourcode", true);
         con_menuButtons.setVisibility(settings.getBoolean("showMenuButtons", true) ? View.VISIBLE : View.INVISIBLE);
+
+        if(showColourcode) {
+            currentKanji = kanjiList.get(kanjiArray[currentIndex]);
+            lbl_furigana.setTextColor(Kanji.getColor(currentKanji.getDifficulty()));
+            lbl_kanji.setTextColor(Kanji.getColor(currentKanji.getDifficulty()));
+            lbl_meaning.setTextColor(Kanji.getColor(currentKanji.getDifficulty()));
+            lbl_difficulty.setTextColor(Kanji.getColor(currentKanji.getDifficulty()));
+        }
     }
 
     @Override
@@ -451,8 +472,7 @@ public class MainActivity extends AppCompatActivity {
             else {
                 fatalError(getString(R.string.errorKanjiListEmpty));
             }
-        }
-        else {
+        } else {
             fatalError(getString(R.string.errorUnableToLoadKanji));
         }
     }
@@ -464,7 +484,9 @@ public class MainActivity extends AppCompatActivity {
         btn_no.setEnabled(true);
         btn_yes.setEnabled(true);
         tbx_input.setEnabled(false);
-        checkInputBoxValue();
+        if(inputMode) {
+            alterDifficulty((checkInputBox() ? -1 : 1), currentKanji);
+        }
         revealed = true;
     }
 
@@ -506,15 +528,15 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(inputModeType == SettingsActivity.INPUT_TYPE_MEANING) {
             check = currentKanji.getMeaning().toLowerCase();
-            return (tbx_input.getText().toString().toLowerCase().equals(check));
+            String[] checks = check.split(",");
+            for(int x = 0; x < checks.length; x++) {
+                if (tbx_input.getText().toString().toLowerCase().equals(checks[x].trim())) {
+                    return true;
+                }
+            }
+            return false;
         }
         return (tbx_input.getText().toString().equals(check));
-    }
-
-    private void checkInputBoxValue() {
-        if(inputMode) {
-            alterDifficulty((checkInputBox() ? -1 : 1), currentKanji);
-        }
     }
 
     private void alterDifficulty(int modifier, Kanji kanji) {
@@ -603,10 +625,22 @@ public class MainActivity extends AppCompatActivity {
         showAlert(context, title, output);
     }
 
+    private void pauseTimer(boolean pause, boolean showToast) {
+        timerPaused = pause;
+        if(pause) {
+            if(timerHandler != null)
+                timerHandler.removeCallbacks(timerRunnable);
+        }
+        else {
+            timerHandler.postDelayed(timerRunnable, 1000);
+        }
+        lbl_paused.setVisibility((pause) ? View.VISIBLE : View.GONE);
+        if(showToast)
+            Toast.makeText(MainActivity.this, (pause) ? getString(R.string.paused) : getString(R.string.resume), Toast.LENGTH_SHORT).show();
+    }
+
     private void callInputActivity(boolean search) {
-        timerPaused = true;
-        if(timerHandler != null)
-            timerHandler.removeCallbacks(timerRunnable);
+        pauseTimer(true, false);
         Intent intent = new Intent(this, InputActivity.class);
         if(search) {
             intent.putExtra("searching", true);
@@ -615,17 +649,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void callKanjiList() {
-        timerPaused = true;
-        if(timerHandler != null)
-            timerHandler.removeCallbacks(timerRunnable);
+        pauseTimer(true, false);
         Intent intent = new Intent(this, ListActivity.class);
         startActivity(intent);
     }
 
     private void callSettings() {
-        timerPaused = true;
-        if(timerHandler != null)
-            timerHandler.removeCallbacks(timerRunnable);
+        pauseTimer(true, false);
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }

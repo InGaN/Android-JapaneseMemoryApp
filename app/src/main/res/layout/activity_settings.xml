@@ -266,6 +266,22 @@
             android:layout_width="fill_parent"
             android:background="#FF909090" />
     <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:text="@string/settingsColourcode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"/>
+        <Switch
+            android:id="@+id/swc_colourcode"
+            android:textOn="@string/yes"
+            android:textOff="@string/no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </TableRow>
+    <TableRow
         android:id="@+id/row_defaultDifficulty"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">

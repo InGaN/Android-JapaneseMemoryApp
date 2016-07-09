@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">My Kanji</string>
-    <string name="version">Version: 0.2.1</string>
+    <string name="version">Version: 0.3.0</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="paused">paused</string>
@@ -74,6 +74,7 @@
     <string name="settingsFilter">Filter difficulty levels</string>
     <string name="settingsChangeDifficulty">Allow difficulty change</string>
     <string name="settingSortOn">Sort words on: </string>
+    <string name='settingsColourcode'>Colour code difficulty</string>
 
     <string name="sortRandom">Random</string>
     <string name="sortDifficultyASC">Difficulty low > high</string>
