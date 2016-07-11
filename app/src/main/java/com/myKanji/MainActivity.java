@@ -289,13 +289,7 @@ public class MainActivity extends AppCompatActivity {
         showColourcode = settings.getBoolean("colourcode", true);
         con_menuButtons.setVisibility(settings.getBoolean("showMenuButtons", true) ? View.VISIBLE : View.INVISIBLE);
 
-        if(showColourcode) {
-            currentKanji = kanjiList.get(kanjiArray[currentIndex]);
-            lbl_furigana.setTextColor(Kanji.getColor(currentKanji.getDifficulty()));
-            lbl_kanji.setTextColor(Kanji.getColor(currentKanji.getDifficulty()));
-            lbl_meaning.setTextColor(Kanji.getColor(currentKanji.getDifficulty()));
-            lbl_difficulty.setTextColor(Kanji.getColor(currentKanji.getDifficulty()));
-        }
+        updateColour();
     }
 
     @Override
@@ -468,12 +462,23 @@ public class MainActivity extends AppCompatActivity {
                 lbl_meaning.setText(currentKanji.getMeaning());
                 lbl_difficulty.setText(currentKanji.getDifficulty() + "/9");
                 lbl_paused.setVisibility(View.GONE);
+                updateColour();
             }
             else {
                 fatalError(getString(R.string.errorKanjiListEmpty));
             }
         } else {
             fatalError(getString(R.string.errorUnableToLoadKanji));
+        }
+    }
+
+    private void updateColour() {
+        if(showColourcode) {
+            int difficulty = kanjiList.get(kanjiArray[currentIndex]).getDifficulty();
+            lbl_furigana.setTextColor(Kanji.getColor(difficulty));
+            lbl_kanji.setTextColor(Kanji.getColor(difficulty));
+            lbl_meaning.setTextColor(Kanji.getColor(difficulty));
+            lbl_difficulty.setTextColor(Kanji.getColor(difficulty));
         }
     }
 
@@ -552,6 +557,7 @@ public class MainActivity extends AppCompatActivity {
 
             db.update(FeedReaderContract.FeedEntry.TABLE_NAME, values, " id=" + kanji.getKanjiID(), null);
             lbl_difficulty.setText(kanji.getDifficulty() + "/9");
+            updateColour();
         }
     }
 
@@ -634,7 +640,9 @@ public class MainActivity extends AppCompatActivity {
         else {
             timerHandler.postDelayed(timerRunnable, 1000);
         }
-        lbl_paused.setVisibility((pause) ? View.VISIBLE : View.GONE);
+
+        if(bar_timer.getVisibility() == View.VISIBLE)
+            lbl_paused.setVisibility((pause) ? View.VISIBLE : View.GONE);
         if(showToast)
             Toast.makeText(MainActivity.this, (pause) ? getString(R.string.paused) : getString(R.string.resume), Toast.LENGTH_SHORT).show();
     }

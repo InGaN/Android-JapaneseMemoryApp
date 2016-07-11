@@ -41,8 +41,8 @@ public class ListActivity extends AppCompatActivity {
     ProgressBar loadProgress;
     CustomListAdapter customListAdapter;
     ArrayList<Kanji> kanji = new ArrayList<>();
-    boolean sortDifficulty;
     boolean searchActive = false;
+    boolean sortDifficulty;
     boolean sortID;
     int totalKanji = 0;
     int loadedKanji = 0;
